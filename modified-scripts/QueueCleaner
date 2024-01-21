@@ -3,9 +3,9 @@ scriptVersion="1.7"
 scriptName="QueueCleaner"
 
 #### Import Settings
-source /config/extended.conf
+source /scripts-config/extended.conf
 #### Import Functions
-source /config/extended/functions
+source /scripts-config/extended/functions
 #### Create Log File
 logfileSetup
 #### Check Arr App
@@ -14,10 +14,10 @@ verifyApiAccess
 
 verifyConfig () {
 	#### Import Settings
-	source /config/extended.conf
+	source /scripts-config/extended.conf
 	
 	if [ "$enableQueueCleaner" != "true" ]; then
-		log "Script is not enabled, enable by setting enableQueueCleaner to \"true\" by modifying the \"/config/extended.conf\" config file..."
+		log "Script is not enabled, enable by setting enableQueueCleaner to \"true\" by modifying the \"/scripts-config/extended.conf\" config file..."
 		log "Sleeping (infinity)"
 		sleep infinity
 	fi

@@ -3,9 +3,9 @@ scriptVersion="3.5"
 scriptName="Video"
 
 ### Import Settings
-source /config/extended.conf
+source /scripts-config/extended.conf
 #### Import Functions
-source /config/extended/functions
+source /scripts-config/extended/functions
 
 verifyConfig () {
 	if [ -z "$videoContainer" ]; then
@@ -13,13 +13,13 @@ verifyConfig () {
 	fi
 
 	if [ "$enableVideo" != "true" ]; then
-		log "Script is not enabled, enable by setting enableVideo to \"true\" by modifying the \"/config/extended.conf\" config file..."
+		log "Script is not enabled, enable by setting enableVideo to \"true\" by modifying the \"/scripts-config/extended.conf\" config file..."
 		log "Sleeping (infinity)"
 		sleep infinity
 	fi
 	
 	if [ -z "$downloadPath" ]; then
-		downloadPath="/config/extended/downloads"
+		downloadPath="/scripts-config/extended/downloads"
 	fi
 
  	if [ -z "$videoScriptInterval" ]; then
@@ -27,8 +27,8 @@ verifyConfig () {
     	fi
 	
 	if [ -z "$videoPath" ]; then
-		log "ERROR: videoPath is not configured via the \"/config/extended.conf\" config file..."
-	 	log "Updated your \"/config/extended.conf\" file with the latest options, see: https://github.com/RandomNinjaAtk/arr-scripts/blob/main/lidarr/extended.conf"
+		log "ERROR: videoPath is not configured via the \"/scripts-config/extended.conf\" config file..."
+	 	log "Updated your \"/scripts-config/extended.conf\" file with the latest options, see: https://github.com/RandomNinjaAtk/arr-scripts/blob/main/lidarr/extended.conf"
 		log "Sleeping (infinity)"
 		sleep infinity
 	fi
@@ -75,12 +75,12 @@ Configuration () {
 	if [ -n "$videoDownloadTag" ]; then
 		log "CONFIG :: Video download tag set to: $videoDownloadTag"
 	fi
-	if [ -f "/config/cookies.txt" ]; then
-		cookiesFile="/config/cookies.txt"
-		log "CONFIG :: Cookies File Found! (/config/cookies.txt)"
+	if [ -f "/scripts-config/cookies.txt" ]; then
+		cookiesFile="/scripts-config/cookies.txt"
+		log "CONFIG :: Cookies File Found! (/scripts-config/cookies.txt)"
 	    else
 		log "CONFIG :: ERROR :: Cookies File Not Found!"
-		log "CONFIG :: ERROR :: Add yt-dlp compatible cookies.txt to the following location: /config/cookies.txt"
+		log "CONFIG :: ERROR :: Add yt-dlp compatible cookies.txt to the following location: /scripts-config/cookies.txt"
 		cookiesFile=""
 	    fi
 	log "CONFIG :: Complete"
@@ -91,17 +91,17 @@ ImvdbCache () {
     if [ -z "$artistImvdbSlug" ]; then
         return
     fi
-    if [ ! -d "/config/extended/cache/imvdb" ]; then
+    if [ ! -d "/scripts-config/extended/cache/imvdb" ]; then
         log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: Creating Cache Folder..."
-        mkdir -p "/config/extended/cache/imvdb"
-        chmod 777 "/config/extended/cache/imvdb"
+        mkdir -p "/scripts-config/extended/cache/imvdb"
+        chmod 777 "/scripts-config/extended/cache/imvdb"
     fi
     
     log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: Caching Records..."
 
-    if [ ! -f /config/extended/cache/imvdb/$artistImvdbSlug ]; then
+    if [ ! -f /scripts-config/extended/cache/imvdb/$artistImvdbSlug ]; then
         log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: Recording Artist Slug into cache"
-        echo -n "$lidarrArtistName" > /config/extended/cache/imvdb/$artistImvdbSlug
+        echo -n "$lidarrArtistName" > /scripts-config/extended/cache/imvdb/$artistImvdbSlug
     fi
 
     count=0
@@ -128,16 +128,16 @@ ImvdbCache () {
     fi
 
     artistImvdbVideoUrlsCount=$(echo "$artistImvdbVideoUrls" | wc -l)
-    cachedArtistImvdbVideoUrlsCount=$(ls /config/extended/cache/imvdb/$lidarrArtistMusicbrainzId--* 2>/dev/null | wc -l)
+    cachedArtistImvdbVideoUrlsCount=$(ls /scripts-config/extended/cache/imvdb/$lidarrArtistMusicbrainzId--* 2>/dev/null | wc -l)
 
     if [ "$artistImvdbVideoUrlsCount" == "$cachedArtistImvdbVideoUrlsCount" ]; then
         log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: Cache is already up-to-date ($artistImvdbVideoUrlsCount==$cachedArtistImvdbVideoUrlsCount), skipping..."
         return
     else 
         log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: Cache needs updating (${artistImvdbVideoUrlsCount}!=${cachedArtistImvdbVideoUrlsCount})..."
-    	if [ -f "/config/extended/logs/video/complete/$lidarrArtistMusicbrainzId" ]; then
+    	if [ -f "/scripts-config/extended/logs/video/complete/$lidarrArtistMusicbrainzId" ]; then
 		    log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: Removing Artist completed log file to allow artist re-processing..."
-		    rm "/config/extended/logs/video/complete/$lidarrArtistMusicbrainzId"
+		    rm "/scripts-config/extended/logs/video/complete/$lidarrArtistMusicbrainzId"
 	    fi
     fi
      
@@ -147,7 +147,7 @@ ImvdbCache () {
     for imvdbVideoUrl in $(echo "$artistImvdbVideoUrls"); do
         imvdbProcessCount=$(( $imvdbProcessCount + 1 ))
         imvdbVideoUrlSlug=$(basename "$imvdbVideoUrl")
-        imvdbVideoData="/config/extended/cache/imvdb/$lidarrArtistMusicbrainzId--$imvdbVideoUrlSlug.json"
+        imvdbVideoData="/scripts-config/extended/cache/imvdb/$lidarrArtistMusicbrainzId--$imvdbVideoUrlSlug.json"
         #echo "$imvdbVideoUrl :: $imvdbVideoUrlSlug :: $imvdbVideoId"
         
         log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: ${imvdbProcessCount}/${artistImvdbVideoUrlsCount} :: Caching video data..."
@@ -260,20 +260,20 @@ VideoProcessWithSMA () {
         if [[ $filenoext.$videoContainer == *.mkv ]]
         then
 
-            if python3 /usr/local/sma/manual.py --config "/config/extended/sma.ini" -i "$file" -nt &>/dev/null; then
+            if python3 /usr/local/sma/manual.py --config "/scripts-config/extended/sma.ini" -i "$file" -nt &>/dev/null; then
                 sleep 0.01
                 log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: ${imvdbProcessCount}/${imvdbArtistVideoCount} :: $2 :: Processed with SMA..."
-                rm  /usr/local/sma/config/*log*
+                rm  /usr/local/sma/scripts-config/*log*
             else
                 log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: ${imvdbProcessCount}/${imvdbArtistVideoCount} :: $2 :: ERROR: SMA Processing Error"
                 rm "$video"
                 log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: ${imvdbProcessCount}/${imvdbArtistVideoCount} :: $2 :: INFO: deleted: $filename"
             fi
         else
-                if python3 /usr/local/sma/manual.py --config "/config/extended/sma-mp4.ini" -i "$file" -nt &>/dev/null; then
+                if python3 /usr/local/sma/manual.py --config "/scripts-config/extended/sma-mp4.ini" -i "$file" -nt &>/dev/null; then
                 sleep 0.01
                 log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: ${imvdbProcessCount}/${imvdbArtistVideoCount} :: $2 :: Processed with SMA..."
-                rm  /usr/local/sma/config/*log*
+                rm  /usr/local/sma/scripts-config/*log*
             else
                 log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: ${imvdbProcessCount}/${imvdbArtistVideoCount} :: $2 :: ERROR: SMA Processing Error"
                 rm "$video"
@@ -384,8 +384,8 @@ VideoNfoWriter () {
     if [ "$5" = "imvdb" ]; then
         echo "	<artist>$lidarrArtistName</artist>" >> "$nfo"
         for featuredArtistSlug in $(echo "$imvdbVideoFeaturedArtistsSlug"); do
-            if [ -f /config/extended/cache/imvdb/$featuredArtistSlug ]; then
-                featuredArtistName="$(cat /config/extended/cache/imvdb/$featuredArtistSlug)"
+            if [ -f /scripts-config/extended/cache/imvdb/$featuredArtistSlug ]; then
+                featuredArtistName="$(cat /scripts-config/extended/cache/imvdb/$featuredArtistSlug)"
                 echo "	<artist>$featuredArtistName</artist>" >> "$nfo"
             fi
         done
@@ -431,8 +431,8 @@ AddFeaturedVideoArtists () {
     log "-----------------------------------------------------------------------------"
     lidarrArtistsData="$(curl -s "$arrUrl/api/v1/artist?apikey=${arrApiKey}" | jq -r ".[]")"
     artistImvdbUrl=$(echo $lidarrArtistsData | jq -r '.links[] | select(.name=="imvdb") | .url')
-    videoArtists=$(ls /config/extended/cache/imvdb/ | grep -Ev ".*--.*")
-    videoArtistsCount=$(ls /config/extended/cache/imvdb/ | grep -Ev ".*--.*" | wc -l)
+    videoArtists=$(ls /scripts-config/extended/cache/imvdb/ | grep -Ev ".*--.*")
+    videoArtistsCount=$(ls /scripts-config/extended/cache/imvdb/ | grep -Ev ".*--.*" | wc -l)
     if [ "$videoArtistsCount" == "0" ]; then
         log "$videoArtistsCount Artists found for processing, skipping..."
         return
@@ -440,7 +440,7 @@ AddFeaturedVideoArtists () {
     loopCount=0
     for slug in $(echo $videoArtists); do
         loopCount=$(( $loopCount + 1))
-        artistName="$(cat /config/extended/cache/imvdb/$slug)"
+        artistName="$(cat /scripts-config/extended/cache/imvdb/$slug)"
         if echo "$artistImvdbUrl" | grep -i "imvdb.com/n/${slug}$" | read; then
             log "$loopCount of $videoArtistsCount :: $artistName :: Already added to Lidarr, skipping..."
             continue
@@ -536,10 +536,10 @@ VideoProcess () {
   	continue
       fi
 
-      if [ -d /config/extended/logs/video/complete ]; then
-        if [ -f "/config/extended/logs/video/complete/$lidarrArtistMusicbrainzId" ]; then
+      if [ -d /scripts-config/extended/logs/video/complete ]; then
+        if [ -f "/scripts-config/extended/logs/video/complete/$lidarrArtistMusicbrainzId" ]; then
             # Only update cache for artist if the completed log file is older than 7 days...
-            if [[ $(find "/config/extended/logs/video/complete/$lidarrArtistMusicbrainzId" -mtime +7 -print) ]]; then
+            if [[ $(find "/scripts-config/extended/logs/video/complete/$lidarrArtistMusicbrainzId" -mtime +7 -print) ]]; then
                 ImvdbCache
             fi
         else
@@ -550,9 +550,9 @@ VideoProcess () {
         ImvdbCache
       fi
       
-      if [ -d /config/extended/logs/video/complete ]; then
+      if [ -d /scripts-config/extended/logs/video/complete ]; then
           # If completed log file found for artist, end processing and skip...
-          if [ -f "/config/extended/logs/video/complete/$lidarrArtistMusicbrainzId" ]; then
+          if [ -f "/scripts-config/extended/logs/video/complete/$lidarrArtistMusicbrainzId" ]; then
               log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: Music Videos previously downloaded, skipping..."
               continue            
           fi
@@ -561,32 +561,32 @@ VideoProcess () {
       if [ -z "$artistImvdbSlug" ]; then
           log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: No IMVDB artist link found, skipping..."
           # Create log of missing IMVDB url...
-          if [ ! -d "/config/extended/logs/video/imvdb-link-missing" ]; then
-              mkdir -p "/config/extended/logs/video/imvdb-link-missing"
-              chmod 777 "/config/extended/logs/video"
-              chmod 777 "/config/extended/logs/video/imvdb-link-missing"
+          if [ ! -d "/scripts-config/extended/logs/video/imvdb-link-missing" ]; then
+              mkdir -p "/scripts-config/extended/logs/video/imvdb-link-missing"
+              chmod 777 "/scripts-config/extended/logs/video"
+              chmod 777 "/scripts-config/extended/logs/video/imvdb-link-missing"
           fi
-          if [ -d "/config/extended/logs/video/imvdb-link-missing" ]; then
-              log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: Logging missing IMVDB artist in folder: /config/extended/logs/video/imvdb-link-missing"
-              touch "/config/extended/logs/video/imvdb-link-missing/${lidarrArtistFolderNoDisambig}--mbid-${lidarrArtistMusicbrainzId}"
+          if [ -d "/scripts-config/extended/logs/video/imvdb-link-missing" ]; then
+              log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: Logging missing IMVDB artist in folder: /scripts-config/extended/logs/video/imvdb-link-missing"
+              touch "/scripts-config/extended/logs/video/imvdb-link-missing/${lidarrArtistFolderNoDisambig}--mbid-${lidarrArtistMusicbrainzId}"
           fi       
       else
       	# Remove missing IMVDB log file, now that it is found...
-      	if [ -f "/config/extended/logs/video/imvdb-link-missing/${lidarrArtistFolderNoDisambig}--mbid-${lidarrArtistMusicbrainzId}" ]; then
-  		rm "/config/extended/logs/video/imvdb-link-missing/${lidarrArtistFolderNoDisambig}--mbid-${lidarrArtistMusicbrainzId}"
+      	if [ -f "/scripts-config/extended/logs/video/imvdb-link-missing/${lidarrArtistFolderNoDisambig}--mbid-${lidarrArtistMusicbrainzId}" ]; then
+  		rm "/scripts-config/extended/logs/video/imvdb-link-missing/${lidarrArtistFolderNoDisambig}--mbid-${lidarrArtistMusicbrainzId}"
   	fi
   	
-          imvdbArtistVideoCount=$(ls /config/extended/cache/imvdb/$lidarrArtistMusicbrainzId--*.json 2>/dev/null | wc -l)
+          imvdbArtistVideoCount=$(ls /scripts-config/extended/cache/imvdb/$lidarrArtistMusicbrainzId--*.json 2>/dev/null | wc -l)
           if [ $imvdbArtistVideoCount = 0 ]; then
               log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: No videos found, skipping..."
               
           else
   
               log "${processCount}/${lidarrArtistIdsCount} :: $lidarrArtistName :: IMVDB :: Processing $imvdbArtistVideoCount Videos!"
-              find /config/extended/cache/imvdb -type f -empty -delete # delete empty files
+              find /scripts-config/extended/cache/imvdb -type f -empty -delete # delete empty files
               
               imvdbProcessCount=0
-              for imvdbVideoData in $(ls /config/extended/cache/imvdb/$lidarrArtistMusicbrainzId--*.json); do
+              for imvdbVideoData in $(ls /scripts-config/extended/cache/imvdb/$lidarrArtistMusicbrainzId--*.json); do
                   imvdbProcessCount=$(( $imvdbProcessCount + 1 ))
                   imvdbVideoTitle="$(cat "$imvdbVideoData" | jq -r .song_title)"
                   videoTitleClean="$(echo "$imvdbVideoTitle" | sed 's%/%-%g')"
@@ -595,10 +595,10 @@ VideoProcess () {
   		          imvdbVideoYear="$(cat "$imvdbVideoData" | jq -r .year)"
                   imvdbVideoImage="$(cat "$imvdbVideoData" | jq -r .image.o)"
                   imvdbVideoArtistsSlug="$(cat "$imvdbVideoData" | jq -r .artists[].slug)"
-                  echo "$lidarrArtistName" > /config/extended/cache/imvdb/$imvdbVideoArtistsSlug
+                  echo "$lidarrArtistName" > /scripts-config/extended/cache/imvdb/$imvdbVideoArtistsSlug
                   imvdbVideoFeaturedArtistsSlug="$(cat "$imvdbVideoData" | jq -r .featured_artists[].slug)"
                   imvdbVideoYoutubeId="$(cat "$imvdbVideoData" | jq -r ".sources[] | select(.is_primary==true) | select(.source==\"youtube\") | .source_data")"
-                  #"/config/extended/cache/musicbrainz/$lidarrArtistId--$lidarrArtistMusicbrainzId--recordings.json"
+                  #"/scripts-config/extended/cache/musicbrainz/$lidarrArtistId--$lidarrArtistMusicbrainzId--recordings.json"
                   #echo "$imvdbVideoTitle :: $imvdbVideoYear :: $imvdbVideoYoutubeId :: $imvdbVideoArtistsSlug"
                   if [ -z "$imvdbVideoYoutubeId" ]; then
                       continue
@@ -625,10 +625,10 @@ VideoProcess () {
   
                   if [ ! -z "$imvdbVideoFeaturedArtistsSlug" ]; then
                       for featuredArtistSlug in $(echo "$imvdbVideoFeaturedArtistsSlug"); do
-                          if [ -f /config/extended/cache/imvdb/$featuredArtistSlug ]; then
-                              featuredArtistName="$(cat /config/extended/cache/imvdb/$featuredArtistSlug)"
+                          if [ -f /scripts-config/extended/cache/imvdb/$featuredArtistSlug ]; then
+                              featuredArtistName="$(cat /scripts-config/extended/cache/imvdb/$featuredArtistSlug)"
                           fi
-                          find /config/extended/cache/imvdb -type f -empty -delete # delete empty files
+                          find /scripts-config/extended/cache/imvdb -type f -empty -delete # delete empty files
                           if [ -z "$featuredArtistName" ]; then
                               continue
                           fi
@@ -675,17 +675,17 @@ VideoProcess () {
   
       fi
   
-      if [ ! -d /config/extended/logs/video ]; then
-          mkdir -p /config/extended/logs/video
-          chmod 777 /config/extended/logs/video
+      if [ ! -d /scripts-config/extended/logs/video ]; then
+          mkdir -p /scripts-config/extended/logs/video
+          chmod 777 /scripts-config/extended/logs/video
       fi
   
-      if [ ! -d /config/extended/logs/video/complete ]; then
-          mkdir -p /config/extended/logs/video/complete 
-          chmod 777 /config/extended/logs/video/complete 
+      if [ ! -d /scripts-config/extended/logs/video/complete ]; then
+          mkdir -p /scripts-config/extended/logs/video/complete 
+          chmod 777 /scripts-config/extended/logs/video/complete 
       fi
   
-      touch "/config/extended/logs/video/complete/$lidarrArtistMusicbrainzId"
+      touch "/scripts-config/extended/logs/video/complete/$lidarrArtistMusicbrainzId"
   
       # Import Artist.nfo file
       if [ -d "$lidarrArtistPath" ]; then

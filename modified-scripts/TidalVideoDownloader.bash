@@ -3,22 +3,22 @@ scriptVersion="1.9"
 scriptName="TidalVideoDownloader"
 
 #### Import Settings
-source /config/extended.conf
+source /scripts-config/extended.conf
 #### Import Functions
-source /config/extended/functions
+source /scripts-config/extended/functions
 
 
 verifyConfig () {
     videoContainer=mkv
 
 	if [ "$enableVideo" != "true" ]; then
-		log "Script is not enabled, enable by setting enableVideo to \"true\" by modifying the \"/config/extended.conf\" config file..."
+		log "Script is not enabled, enable by setting enableVideo to \"true\" by modifying the \"/scripts-config/extended.conf\" config file..."
 		log "Sleeping (infinity)"
 		sleep infinity
 	fi
 	
 	if [ -z "$downloadPath" ]; then
-		downloadPath="/config/extended/downloads"
+		downloadPath="/scripts-config/extended/downloads"
 	fi
 	videoDownloadPath="$downloadPath/tidal/videos"
  	if [ -z "$videoScriptInterval" ]; then
@@ -26,8 +26,8 @@ verifyConfig () {
     	fi
 	
 	if [ -z "$videoPath" ]; then
-		log "ERROR: videoPath is not configured via the \"/config/extended.conf\" config file..."
-	 	log "Updated your \"/config/extended.conf\" file with the latest options, see: https://github.com/RandomNinjaAtk/arr-scripts/blob/main/lidarr/extended.conf"
+		log "ERROR: videoPath is not configured via the \"/scripts-config/extended.conf\" config file..."
+	 	log "Updated your \"/scripts-config/extended.conf\" file with the latest options, see: https://github.com/RandomNinjaAtk/arr-scripts/blob/main/lidarr/extended.conf"
 		log "Sleeping (infinity)"
 		sleep infinity
 	fi
@@ -43,23 +43,23 @@ verifyConfig () {
 
 TidalClientSetup () {
 	log "TIDAL :: Verifying tidal-dl configuration"
-	if [ ! -f /config/xdg/.tidal-dl.json ]; then
+	if [ ! -f /scripts-config/xdg/.tidal-dl.json ]; then
 		log "TIDAL :: No default config found, importing default config \"tidal.json\""
-		if [ -f /config/extended/tidal-dl.json ]; then
-			cp /config/extended/tidal-dl.json /config/xdg/.tidal-dl.json
-			chmod 777 -R /config/xdg/
+		if [ -f /scripts-config/extended/tidal-dl.json ]; then
+			cp /scripts-config/extended/tidal-dl.json /scripts-config/xdg/.tidal-dl.json
+			chmod 777 -R /scripts-config/xdg/
 		fi
 	fi
 	
-	tidal-dl -o "$videoDownloadPath"/incomplete 2>&1 | tee -a "/config/logs/$logFileName"
+	tidal-dl -o "$videoDownloadPath"/incomplete 2>&1 | tee -a "/scripts-config/logs/$logFileName"
 	tidalQuality=HiFi
 
-	if [ ! -f /config/xdg/.tidal-dl.token.json ]; then
+	if [ ! -f /scripts-config/xdg/.tidal-dl.token.json ]; then
 		#log "TIDAL :: ERROR :: Downgrade tidal-dl for workaround..."
 		#pip3 install tidal-dl==2022.3.4.2 --no-cache-dir &>/dev/null
 		log "TIDAL :: ERROR :: Loading client for required authentication, please authenticate, then exit the client..."
 		NotifyWebhook "FatalError" "TIDAL requires authentication, please authenticate now (check logs)"
-		tidal-dl 2>&1 | tee -a "/config/logs/$logFileName"
+		tidal-dl 2>&1 | tee -a "/scripts-config/logs/$logFileName"
 	fi
 	
 	if [ ! -d "$videoDownloadPath/incomplete" ]; then
@@ -94,7 +94,7 @@ TidalClientTest () {
 	while [ $i -lt 3 ]; do
 		i=$(( $i + 1 ))
   		TidaldlStatusCheck
-		tidal-dl -q Normal -o "$videoDownloadPath"/incomplete -l "$tidalClientTestDownloadId" 2>&1 | tee -a "/config/logs/$logFileName" 
+		tidal-dl -q Normal -o "$videoDownloadPath"/incomplete -l "$tidalClientTestDownloadId" 2>&1 | tee -a "/scripts-config/logs/$logFileName" 
 		downloadCount=$(find "$videoDownloadPath"/incomplete -type f -regex ".*/.*\.\(flac\|opus\|m4a\|mp3\)" | wc -l)
 		if [ $downloadCount -le 0 ]; then
 			continue
@@ -104,8 +104,8 @@ TidalClientTest () {
 	done
  	tidalClientTest="unknown"
 	if [ $downloadCount -le 0 ]; then
-		if [ -f /config/xdg/.tidal-dl.token.json ]; then
-			rm /config/xdg/.tidal-dl.token.json
+		if [ -f /scripts-config/xdg/.tidal-dl.token.json ]; then
+			rm /scripts-config/xdg/.tidal-dl.token.json
 		fi
 		log "TIDAL :: ERROR :: Download failed"
 		log "TIDAL :: ERROR :: You will need to re-authenticate on next script run..."
@@ -133,8 +133,8 @@ AddFeaturedVideoArtists () {
     log "-----------------------------------------------------------------------------"
     lidarrArtistsData="$(curl -s "$arrUrl/api/v1/artist?apikey=${arrApiKey}" | jq -r ".[]")"
     artistTidalUrl=$(echo $lidarrArtistsData | jq -r '.links[] | select(.name=="tidal") | .url')
-    videoArtists=$(ls /config/extended/cache/tidal-videos/)
-    videoArtistsCount=$(ls /config/extended/cache/tidal-videos/ | wc -l)
+    videoArtists=$(ls /scripts-config/extended/cache/tidal-videos/)
+    videoArtistsCount=$(ls /scripts-config/extended/cache/tidal-videos/ | wc -l)
     if [ "$videoArtistsCount" == "0" ]; then
         log "$videoArtistsCount Artists found for processing, skipping..."
         return
@@ -142,7 +142,7 @@ AddFeaturedVideoArtists () {
     loopCount=0
     for slug in $(echo $videoArtists); do
         loopCount=$(( $loopCount + 1))
-        artistName="$(cat /config/extended/cache/tidal-videos/$slug)"
+        artistName="$(cat /scripts-config/extended/cache/tidal-videos/$slug)"
         if echo "$artistTidalUrl" | grep -i "tidal.com/artist/${slug}$" | read; then
             log "$loopCount of $videoArtistsCount :: $artistName :: Already added to Lidarr, skipping..."
             continue
@@ -298,7 +298,7 @@ VideoProcess () {
 				existingFileSize=$(stat -c "%s" "$existingFile")
 			fi
 
-			if [ -f "/config/extended/logs/tidal-video/$id" ]; then
+			if [ -f "/scripts-config/extended/logs/tidal-video/$id" ]; then
 				log "$processCount/$lidarrArtistCount :: $lidarrArtistName :: $tidalVideoProcessNumber/$tidalVideoIdsCount :: $videoTitle ($id) :: Previously Downloaded" 
 				if [ -f "$existingFile" ]; then
 					log "$processCount/$lidarrArtistCount :: $lidarrArtistName :: $tidalVideoProcessNumber/$tidalVideoIdsCount :: $videoTitle ($id) :: Previously Downloaded, skipping..."
@@ -308,20 +308,20 @@ VideoProcess () {
 				fi
 			fi
 
-			if [ ! -d "/config/extended/cache/tidal-videos" ]; then
-				mkdir -p "/config/extended/cache/tidal-videos"
-				chmod 777 "/config/extended/cache/tidal-videos"
+			if [ ! -d "/scripts-config/extended/cache/tidal-videos" ]; then
+				mkdir -p "/scripts-config/extended/cache/tidal-videos"
+				chmod 777 "/scripts-config/extended/cache/tidal-videos"
 			fi
-			if [ ! -f "/config/extended/cache/tidal-videos/$tidalArtistIds" ]; then
-				echo  -n "$lidarrArtistName" > "/config/extended/cache/tidal-videos/$tidalArtistIds"
+			if [ ! -f "/scripts-config/extended/cache/tidal-videos/$tidalArtistIds" ]; then
+				echo  -n "$lidarrArtistName" > "/scripts-config/extended/cache/tidal-videos/$tidalArtistIds"
 			fi
 
 			for videoArtistId in $(echo "$videoArtistsIds"); do
 				videoArtistData=$(echo "$videoArtists" | jq -r "select(.id==$videoArtistId)")
 				videoArtistName=$(echo "$videoArtistData" | jq -r .name)
 				videoArtistType=$(echo "$videoArtistData" | jq -r .type)
-				if [ ! -f "/config/extended/cache/tidal-videos/$videoArtistId" ]; then
-					echo  -n "$videoArtistName" > "/config/extended/cache/tidal-videos/$videoArtistId"
+				if [ ! -f "/scripts-config/extended/cache/tidal-videos/$videoArtistId" ]; then
+					echo  -n "$videoArtistName" > "/scripts-config/extended/cache/tidal-videos/$videoArtistId"
 				fi
 			done
 
@@ -333,7 +333,7 @@ VideoProcess () {
 
 			downloadFailed=false
 			log "$processCount/$lidarrArtistCount :: $lidarrArtistName :: $tidalVideoProcessNumber/$tidalVideoIdsCount :: $videoTitle ($id) :: Downloading..."
-			tidal-dl -r P1080 -o "$videoDownloadPath/incomplete" -l "$videoUrl" 2>&1 | tee -a "/config/logs/$logFileName"
+			tidal-dl -r P1080 -o "$videoDownloadPath/incomplete" -l "$videoUrl" 2>&1 | tee -a "/scripts-config/logs/$logFileName"
 			find "$videoDownloadPath/incomplete" -type f -exec mv "{}" "$videoDownloadPath/incomplete"/ \;
 			find "$videoDownloadPath/incomplete" -mindepth 1 -type d -exec rm -rf "{}" \; &>/dev/null
 			find "$videoDownloadPath/incomplete" -type f -regex ".*/.*\.\(mkv\|mp4\)"  -print0 | while IFS= read -r -d '' video; do
@@ -359,10 +359,10 @@ VideoProcess () {
 					rm -rf "$videoDownloadPath/incomplete"
 				fi
 
-				if python3 /usr/local/sma/manual.py --config "/config/extended/sma.ini" -i "$videoDownloadPath/$filename" -nt; then
+				if python3 /usr/local/sma/manual.py --config "/scripts-config/extended/sma.ini" -i "$videoDownloadPath/$filename" -nt; then
 					sleep 0.01
 					log "$processCount/$lidarrArtistCount :: $lidarrArtistName :: $tidalVideoProcessNumber/$tidalVideoIdsCount :: $videoTitle ($id) :: Processed with SMA..."
-					rm  /usr/local/sma/config/*log*
+					rm  /usr/local/sma/scripts-config/*log*
 				else
 					log "$processCount/$lidarrArtistCount :: $lidarrArtistName :: $tidalVideoProcessNumber/$tidalVideoIdsCount :: $videoTitle ($id) :: ERROR: SMA Processing Error"
 					rm "$videoDownloadPath/$filename"
@@ -384,7 +384,7 @@ VideoProcess () {
 						-metadata ALBUMARTIST="$lidarrArtistName" \
 						-metadata ENCODED_BY="lidarr-extended" \
 						-attach "$videoDownloadPath/poster.jpg" -metadata:s:t mimetype=image/jpeg \
-						"$videoDownloadPath/$videoFileName"  2>&1 | tee -a "/config/logs/$logFileName"
+						"$videoDownloadPath/$videoFileName"  2>&1 | tee -a "/scripts-config/logs/$logFileName"
 					chmod 666 "$videoDownloadPath/$videoFileName"
 				fi
 				if [ -f "$videoDownloadPath/$videoFileName" ]; then
@@ -402,9 +402,9 @@ VideoProcess () {
 			downloadedFileSize=$(stat -c "%s" "$videoDownloadPath/$videoFileName")
 
 			if [ -f "$existingFile" ]; then
-				log "$processCount/$lidarrArtistCount :: $lidarrArtistName :: $tidalVideoProcessNumber/$tidalVideoIdsCount :: $videoTitle ($id) :: Logging completed download $id to: /config/extended/logs/tidal-video/$id"
-				touch /config/extended/logs/tidal-video/$id
-				chmod 666 "/config/extended/logs/tidal-video/$id"
+				log "$processCount/$lidarrArtistCount :: $lidarrArtistName :: $tidalVideoProcessNumber/$tidalVideoIdsCount :: $videoTitle ($id) :: Logging completed download $id to: /scripts-config/extended/logs/tidal-video/$id"
+				touch /scripts-config/extended/logs/tidal-video/$id
+				chmod 666 "/scripts-config/extended/logs/tidal-video/$id"
 				if [ $downloadedFileSize -lt $existingFileSize ]; then
 					log "$processCount/$lidarrArtistCount :: $lidarrArtistName :: $tidalVideoProcessNumber/$tidalVideoIdsCount :: $videoTitle ($id) :: Downloaded file is smaller than existing file ($downloadedFileSize -lt $existingFileSize), skipping..."
 					rm -rf "$videoDownloadPath"/*
@@ -489,13 +489,13 @@ VideoProcess () {
 				fi
 			fi
 
-			if [ ! -d /config/extended/logs/tidal-video ]; then
-				mkdir -p /config/extended/logs/tidal-video 
-				chmod 777 /config/extended/logs/tidal-video 
+			if [ ! -d /scripts-config/extended/logs/tidal-video ]; then
+				mkdir -p /scripts-config/extended/logs/tidal-video 
+				chmod 777 /scripts-config/extended/logs/tidal-video 
 			fi
-			log "$processCount/$lidarrArtistCount :: $lidarrArtistName :: $tidalVideoProcessNumber/$tidalVideoIdsCount :: $videoTitle ($id) :: Logging completed download $id to: /config/extended/logs/tidal-video/$id"
-			touch /config/extended/logs/tidal-video/$id
-			chmod 666 "/config/extended/logs/tidal-video/$id"
+			log "$processCount/$lidarrArtistCount :: $lidarrArtistName :: $tidalVideoProcessNumber/$tidalVideoIdsCount :: $videoTitle ($id) :: Logging completed download $id to: /scripts-config/extended/logs/tidal-video/$id"
+			touch /scripts-config/extended/logs/tidal-video/$id
+			chmod 666 "/scripts-config/extended/logs/tidal-video/$id"
 		done
 	done
 }

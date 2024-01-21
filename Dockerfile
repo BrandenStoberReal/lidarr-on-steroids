@@ -89,25 +89,25 @@ RUN mkdir -p /custom-services.d
 
 # Download services
 RUN echo "Download QueueCleaner service..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/universal/services/QueueCleaner -o /custom-services.d/QueueCleaner
+RUN curl https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/modified-scripts/QueueCleaner -o /custom-services.d/QueueCleaner
 
 RUN echo "Download AutoConfig service..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/AutoConfig.service.bash -o /custom-services.d/AutoConfig
+RUN curl https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/modified-scripts/AutoConfig.service.bash -o /custom-services.d/AutoConfig
 
 RUN echo "Download Video service..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/Video.service.bash -o /custom-services.d/Video
+RUN curl https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/modified-scripts/Video.service.bash -o /custom-services.d/Video
 
 RUN echo "Download Tidal Video Downloader service..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/TidalVideoDownloader.bash -o /custom-services.d/TidalVideoDownloader
+RUN curl https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/modified-scripts/TidalVideoDownloader.bash -o /custom-services.d/TidalVideoDownloader
 
 RUN echo "Download Audio service..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/Audio.service.bash -o /custom-services.d/Audio
+RUN curl https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/modified-scripts/Audio.service.bash -o /custom-services.d/Audio
 
 RUN echo "Download AutoArtistAdder service..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/AutoArtistAdder.bash -o /custom-services.d/AutoArtistAdder
+RUN curl https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/modified-scripts/AutoArtistAdder.bash -o /custom-services.d/AutoArtistAdder
 
 RUN echo "Download UnmappedFilesCleaner service..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/UnmappedFilesCleaner.bash -o /custom-services.d/UnmappedFilesCleaner
+RUN curl https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/modified-scripts/UnmappedFilesCleaner.bash -o /custom-services.d/UnmappedFilesCleaner
 
 # Download configs
 RUN mkdir -p /scripts-config

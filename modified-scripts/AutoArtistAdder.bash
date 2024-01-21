@@ -3,16 +3,16 @@ scriptVersion="2.1"
 scriptName="AutoArtistAdder"
 
 ### Import Settings
-source /config/extended.conf
+source /scripts-config/extended.conf
 #### Import Functions
-source /config/extended/functions
+source /scripts-config/extended/functions
 
 verifyConfig () {
  
   if echo "$addDeezerTopArtists $addDeezerTopAlbumArtists $addDeezerTopTrackArtists $addRelatedArtists" | grep -i "true" | read; then
     sleep 0.01
   else
-    log "Script is not enabled, enable by setting addDeezerTopArtists. addDeezerTopAlbumArtists, addDeezerTopTrackArtists or addRelatedArtists to \"true\" by modifying the \"/config/extended.conf\" config file..."
+    log "Script is not enabled, enable by setting addDeezerTopArtists. addDeezerTopAlbumArtists, addDeezerTopTrackArtists or addRelatedArtists to \"true\" by modifying the \"/scripts-config/extended.conf\" config file..."
     log "Sleeping (infinity)"
     sleep infinity
   fi

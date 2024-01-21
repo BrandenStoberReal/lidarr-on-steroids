@@ -3,14 +3,14 @@ scriptVersion="2.30"
 scriptName="Audio"
 
 ### Import Settings
-source /config/extended.conf
+source /scripts-config/extended.conf
 #### Import Functions
-source /config/extended/functions
+source /scripts-config/extended/functions
 
 verifyConfig () {
 
   if [ "$enableAudio" != "true" ]; then
-    log "Script is not enabled, enable by setting enableAudio to \"true\" by modifying the \"/config/extended.conf\" config file..."
+    log "Script is not enabled, enable by setting enableAudio to \"true\" by modifying the \"/scripts-config/extended.conf\" config file..."
     log "Sleeping (infinity)"
     sleep infinity
   fi
@@ -20,7 +20,7 @@ verifyConfig () {
   fi
 
   if [ -z "$downloadPath" ]; then
-    downloadPath="/config/extended/downloads"
+    downloadPath="/scripts-config/extended/downloads"
   fi
 
   if [ -z "$failedDownloadAttemptThreshold" ]; then
@@ -68,8 +68,8 @@ Configuration () {
 	
 	
 	
-	if [ ! -d /config/xdg ]; then
-		mkdir -p /config/xdg
+	if [ ! -d /scripts-config/xdg ]; then
+		mkdir -p /scripts-config/xdg
 	fi
  
 	if [ -z $topLimit ]; then
@@ -142,9 +142,9 @@ Configuration () {
 		log "Beets Tagging Enabled"
 		log "Beets Matching Threshold ${beetsMatchPercentage}%"
 		beetsMatchPercentage=$(expr 100 - $beetsMatchPercentage )
-		if cat /config/extended/beets-config.yaml | grep "strong_rec_thresh: 0.04" | read; then
+		if cat /scripts-config/extended/beets-config.yaml | grep "strong_rec_thresh: 0.04" | read; then
 			log "Configuring Beets Matching Threshold"
-			sed -i "s/strong_rec_thresh: 0.04/strong_rec_thresh: 0.${beetsMatchPercentage}/g" /config/extended/beets-config.yaml
+			sed -i "s/strong_rec_thresh: 0.04/strong_rec_thresh: 0.${beetsMatchPercentage}/g" /scripts-config/extended/beets-config.yaml
 		fi
 	else
 		log "Beets Tagging Disabled"
@@ -155,7 +155,7 @@ Configuration () {
 }
 
 DownloadClientFreyr () {
-	freyr --no-bar --no-net-check -d $audioPath/incomplete deezer:album:$1 2>&1 | tee -a "/config/logs/$logFileName"
+	freyr --no-bar --no-net-check -d $audioPath/incomplete deezer:album:$1 2>&1 | tee -a "/scripts-config/logs/$logFileName"
  	# Resolve issue 94
  	if [ -d /root/.cache/FreyrCLI ]; then
   		rm -rf  /root/.cache/FreyrCLI/*
@@ -244,36 +244,36 @@ DownloadFolderCleaner () {
 
 NotFoundFolderCleaner () {
 	# check for completed download folder
-	if [ -d /config/extended/logs/notfound ]; then
+	if [ -d /scripts-config/extended/logs/notfound ]; then
 		# check for notfound entries older than X days
-		if find /config/extended/logs/notfound -mindepth 1 -type f -mtime +$retryNotFound | read; then
+		if find /scripts-config/extended/logs/notfound -mindepth 1 -type f -mtime +$retryNotFound | read; then
 			log "Removing prevously notfound lidarr album ids older than $retryNotFound days to give them a retry..."
 			# delete ntofound entries older than X days
-			find /config/extended/logs/notfound -mindepth 1 -type f -mtime +$retryNotFound -delete
+			find /scripts-config/extended/logs/notfound -mindepth 1 -type f -mtime +$retryNotFound -delete
 		fi
 	fi
 }
 
 TidalClientSetup () {
 	log "TIDAL :: Verifying tidal-dl configuration"
-	touch /config/xdg/.tidal-dl.log
-	if [ -f /config/xdg/.tidal-dl.json ]; then
-		rm /config/xdg/.tidal-dl.json
+	touch /scripts-config/xdg/.tidal-dl.log
+	if [ -f /scripts-config/xdg/.tidal-dl.json ]; then
+		rm /scripts-config/xdg/.tidal-dl.json
 	fi
-	if [ ! -f /config/xdg/.tidal-dl.json ]; then
+	if [ ! -f /scripts-config/xdg/.tidal-dl.json ]; then
 		log "TIDAL :: No default config found, importing default config \"tidal.json\""
-		if [ -f /config/extended/tidal-dl.json ]; then
-			cp /config/extended/tidal-dl.json /config/xdg/.tidal-dl.json
-			chmod 777 -R /config/xdg/
+		if [ -f /scripts-config/extended/tidal-dl.json ]; then
+			cp /scripts-config/extended/tidal-dl.json /scripts-config/xdg/.tidal-dl.json
+			chmod 777 -R /scripts-config/xdg/
 		fi
 
 	fi
 	
 	TidaldlStatusCheck
-	tidal-dl -o "$audioPath"/incomplete 2>&1 | tee -a "/config/logs/$logFileName"
+	tidal-dl -o "$audioPath"/incomplete 2>&1 | tee -a "/scripts-config/logs/$logFileName"
 	DownloadFormat
 
-	if [ ! -f /config/xdg/.tidal-dl.token.json ]; then
+	if [ ! -f /scripts-config/xdg/.tidal-dl.token.json ]; then
 		TidaldlStatusCheck
 		#log "TIDAL :: ERROR :: Downgrade tidal-dl for workaround..."
 		#pip3 install tidal-dl==2022.3.4.2 --no-cache-dir &>/dev/null
@@ -283,14 +283,14 @@ TidalClientSetup () {
 		tidal-dl
 	fi
 
-	if [ ! -d /config/extended/cache/tidal ]; then
-		mkdir -p /config/extended/cache/tidal
-		chmod 777 /config/extended/cache/tidal
+	if [ ! -d /scripts-config/extended/cache/tidal ]; then
+		mkdir -p /scripts-config/extended/cache/tidal
+		chmod 777 /scripts-config/extended/cache/tidal
 	fi
 	
-	if [ -d /config/extended/cache/tidal ]; then
+	if [ -d /scripts-config/extended/cache/tidal ]; then
 		log "TIDAL :: Purging album list cache..."
-		rm /config/extended/cache/tidal/*-albums.json &>/dev/null
+		rm /scripts-config/extended/cache/tidal/*-albums.json &>/dev/null
 	fi
 	
 	if [ ! -d "$audioPath/incomplete" ]; then
@@ -326,7 +326,7 @@ TidalClientTest () {
 	while [ $i -lt 3 ]; do
 		i=$(( $i + 1 ))
   		TidaldlStatusCheck
-		tidal-dl -q Normal -o "$audioPath"/incomplete -l "$tidalClientTestDownloadId" 2>&1 | tee -a "/config/logs/$logFileName"
+		tidal-dl -q Normal -o "$audioPath"/incomplete -l "$tidalClientTestDownloadId" 2>&1 | tee -a "/scripts-config/logs/$logFileName"
 		downloadCount=$(find "$audioPath"/incomplete -type f -regex ".*/.*\.\(flac\|opus\|m4a\|mp3\)" | wc -l)
 		if [ $downloadCount -le 0 ]; then
 			continue
@@ -336,8 +336,8 @@ TidalClientTest () {
 	done
  	tidalClientTest="unknown"
 	if [ $downloadCount -le 0 ]; then
-		if [ -f /config/xdg/.tidal-dl.token.json ]; then
-			rm /config/xdg/.tidal-dl.token.json
+		if [ -f /scripts-config/xdg/.tidal-dl.token.json ]; then
+			rm /scripts-config/xdg/.tidal-dl.token.json
 		fi
 		log "TIDAL :: ERROR :: Download failed"
 		log "TIDAL :: ERROR :: You will need to re-authenticate on next script run..."
@@ -377,34 +377,34 @@ DownloadProcess () {
 		rm -rf "$audioPath"/complete/*
 	fi
 
-	if [ ! -d "/config/extended/logs" ]; then
-		mkdir -p /config/extended/logs
-		chmod 777 /config/extended/logs
+	if [ ! -d "/scripts-config/extended/logs" ]; then
+		mkdir -p /scripts-config/extended/logs
+		chmod 777 /scripts-config/extended/logs
 	fi
 
-	if [ ! -d "/config/extended/logs/downloaded" ]; then
-		mkdir -p /config/extended/logs/downloaded
-		chmod 777 /config/extended/logs/downloaded
+	if [ ! -d "/scripts-config/extended/logs/downloaded" ]; then
+		mkdir -p /scripts-config/extended/logs/downloaded
+		chmod 777 /scripts-config/extended/logs/downloaded
 	fi
 
-	if [ ! -d "/config/extended/logs/downloaded/deezer" ]; then
-		mkdir -p /config/extended/logs/downloaded/deezer
-		chmod 777 /config/extended/logs/downloaded/deezer
+	if [ ! -d "/scripts-config/extended/logs/downloaded/deezer" ]; then
+		mkdir -p /scripts-config/extended/logs/downloaded/deezer
+		chmod 777 /scripts-config/extended/logs/downloaded/deezer
 	fi
 
-	if [ ! -d "/config/extended/logs/downloaded/tidal" ]; then
-		mkdir -p /config/extended/logs/downloaded/tidal
-		chmod 777 /config/extended/logs/downloaded/tidal
+	if [ ! -d "/scripts-config/extended/logs/downloaded/tidal" ]; then
+		mkdir -p /scripts-config/extended/logs/downloaded/tidal
+		chmod 777 /scripts-config/extended/logs/downloaded/tidal
 	fi
 
-	if [ ! -d /config/extended/logs/downloaded/failed/deezer ]; then
-		mkdir -p /config/extended/logs/downloaded/failed/deezer
-		chmod 777 /config/extended/logs/downloaded/failed/deezer
+	if [ ! -d /scripts-config/extended/logs/downloaded/failed/deezer ]; then
+		mkdir -p /scripts-config/extended/logs/downloaded/failed/deezer
+		chmod 777 /scripts-config/extended/logs/downloaded/failed/deezer
 	fi
 
-	if [ ! -d /config/extended/logs/downloaded/failed/tidal ]; then
-		mkdir -p /config/extended/logs/downloaded/failed/tidal
-		chmod 777 /config/extended/logs/downloaded/failed/tidal
+	if [ ! -d /scripts-config/extended/logs/downloaded/failed/tidal ]; then
+		mkdir -p /scripts-config/extended/logs/downloaded/failed/tidal
+		chmod 777 /scripts-config/extended/logs/downloaded/failed/tidal
 	fi
 
 	downloadedAlbumTitleClean="$(echo "$4" | sed -e "s%[^[:alpha:][:digit:]._' ]% %g" -e "s/  */ /g" | sed 's/^[.]*//' | sed  's/[.]*$//g' | sed  's/^ *//g' | sed 's/ *$//g')"
@@ -416,11 +416,11 @@ DownloadProcess () {
 
 	# check for log file
 	if [ "$2" == "DEEZER" ]; then
-		if [ -f /config/extended/logs/downloaded/deezer/$1 ]; then
+		if [ -f /scripts-config/extended/logs/downloaded/deezer/$1 ]; then
 			log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: ERROR :: Previously Downloaded ($1)..."
 			return
 		fi
-		if [ -f /config/extended/logs/downloaded/failed/deezer/$1 ]; then
+		if [ -f /scripts-config/extended/logs/downloaded/failed/deezer/$1 ]; then
 			log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: ERROR :: Previously Attempted Download ($1)..."
 			return
 		fi
@@ -428,11 +428,11 @@ DownloadProcess () {
 
 	# check for log file
 	if [ "$2" == "TIDAL" ]; then
-		if [ -f /config/extended/logs/downloaded/tidal/$1 ]; then
+		if [ -f /scripts-config/extended/logs/downloaded/tidal/$1 ]; then
 			log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: ERROR :: Previously Downloaded ($1)..."
 			return
 		fi
-		if [ -f /config/extended/logs/downloaded/failed/tidal/$1 ]; then
+		if [ -f /scripts-config/extended/logs/downloaded/failed/tidal/$1 ]; then
 			log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: ERROR :: Previously Attempted Download ($1)..."
 			return
 		fi
@@ -457,7 +457,7 @@ DownloadProcess () {
 			if [ -z $arlToken ]; then
 				DownloadClientFreyr $1
 			else
-				deemix -b $deemixQuality -p "$audioPath"/incomplete "https://www.deezer.com/album/$1" 2>&1 | tee -a "/config/logs/$logFileName"
+				deemix -b $deemixQuality -p "$audioPath"/incomplete "https://www.deezer.com/album/$1" 2>&1 | tee -a "/scripts-config/logs/$logFileName"
 			fi
 			
 			if [ -d "/tmp/deemix-imgs" ]; then
@@ -494,7 +494,7 @@ DownloadProcess () {
 				if [ -z $arlToken ]; then
 					DownloadClientFreyr $1
 				else
-					deemix -b $deemixQuality -p "$audioPath"/incomplete "https://www.deezer.com/album/$1" 2>&1 | tee -a "/config/logs/$logFileName"
+					deemix -b $deemixQuality -p "$audioPath"/incomplete "https://www.deezer.com/album/$1" 2>&1 | tee -a "/scripts-config/logs/$logFileName"
 				fi
     			fi
        		fi
@@ -502,7 +502,7 @@ DownloadProcess () {
 		if [ "$2" == "TIDAL" ]; then
 			TidaldlStatusCheck
 
-			tidal-dl -q $tidalQuality -o "$audioPath/incomplete" -l "$1"  2>&1 | tee -a "/config/logs/$logFileName"
+			tidal-dl -q $tidalQuality -o "$audioPath/incomplete" -l "$1"  2>&1 | tee -a "/scripts-config/logs/$logFileName"
 
 			# Verify Client Works...
 			clientTestDlCount=$(find "$audioPath"/incomplete/ -type f -regex ".*/.*\.\(flac\|opus\|m4a\|mp3\)" | wc -l)
@@ -573,10 +573,10 @@ DownloadProcess () {
 
 
 		if [ "$2" == "DEEZER" ]; then
-			touch /config/extended/logs/downloaded/failed/deezer/$1
+			touch /scripts-config/extended/logs/downloaded/failed/deezer/$1
 		fi
 		if [ "$2" == "TIDAL" ]; then
-			touch /config/extended/logs/downloaded/failed/tidal/$1
+			touch /scripts-config/extended/logs/downloaded/failed/tidal/$1
 		fi
 		return
 	fi
@@ -584,21 +584,21 @@ DownloadProcess () {
 	# Log Completed Download
 	log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Logging $1 as successfully downloaded..."
 	if [ "$2" == "DEEZER" ]; then
-		touch /config/extended/logs/downloaded/deezer/$1
+		touch /scripts-config/extended/logs/downloaded/deezer/$1
 	fi
 	if [ "$2" == "TIDAL" ]; then
-		touch /config/extended/logs/downloaded/tidal/$1
+		touch /scripts-config/extended/logs/downloaded/tidal/$1
 	fi
 
 	# Tag with beets
 	if [ "$enableBeetsTagging" == "true" ]; then
-		if [ -f /config/extended/beets-error ]; then
-			rm /config/extended/beets-error
+		if [ -f /scripts-config/extended/beets-error ]; then
+			rm /scripts-config/extended/beets-error
 		fi
 		log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Processing files with beets..."
 		ProcessWithBeets "$audioPath/incomplete"
 
-		if [ -f /config/extended/beets-error ]; then
+		if [ -f /scripts-config/extended/beets-error ]; then
 			return
 		fi 
 	fi
@@ -701,24 +701,24 @@ DownloadProcess () {
 ProcessWithBeets () {
 	# Input
 	# $1 Download Folder to process
-	if [ -f /config/extended/beets-library.blb ]; then
-		rm /config/extended/beets-library.blb
+	if [ -f /scripts-config/extended/beets-library.blb ]; then
+		rm /scripts-config/extended/beets-library.blb
 		sleep 0.5
 	fi
-	if [ -f /config/extended/beets.log ]; then 
-		rm /config/extended/beets.log
+	if [ -f /scripts-config/extended/beets.log ]; then 
+		rm /scripts-config/extended/beets.log
 		sleep 0.5
 	fi
 
-	if [ -f "/config/beets-match" ]; then 
-		rm "/config/beets-match"
+	if [ -f "/scripts-config/beets-match" ]; then 
+		rm "/scripts-config/beets-match"
 		sleep 0.5
 	fi
-	touch "/config/beets-match"
+	touch "/scripts-config/beets-match"
 	sleep 0.5
 
-	beet -c /config/extended/beets-config.yaml -l /config/extended/beets-library.blb -d "$1" import -qC "$1"
-	if [ $(find "$1" -type f -regex ".*/.*\.\(flac\|opus\|m4a\|mp3\)" -newer "/config/beets-match" | wc -l) -gt 0 ]; then
+	beet -c /scripts-config/extended/beets-config.yaml -l /scripts-config/extended/beets-library.blb -d "$1" import -qC "$1"
+	if [ $(find "$1" -type f -regex ".*/.*\.\(flac\|opus\|m4a\|mp3\)" -newer "/scripts-config/beets-match" | wc -l) -gt 0 ]; then
 		log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: SUCCESS: Matched with beets!"
 		log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: fixing track tags" 
 		find "$audioPath/incomplete" -type f -iname "*.flac" -print0 | while IFS= read -r -d '' file; do
@@ -754,8 +754,8 @@ ProcessWithBeets () {
 		return
 	fi	
 
-	if [ -f "/config/beets-match" ]; then 
-		rm "/config/beets-match"
+	if [ -f "/scripts-config/beets-match" ]; then 
+		rm "/scripts-config/beets-match"
 		sleep 0.1
 	fi
 
@@ -777,14 +777,14 @@ ProcessWithBeets () {
 		matchedLidarrAlbumArtistId="$(echo $matchedTags | jq -r '."MusicBrainz Ablum Artist Id"')"
 	fi
 
-	if [ ! -d "/config/extended/logs/downloaded/musicbrainz_matched" ]; then
-		mkdir -p "/config/extended/logs/downloaded/musicbrainz_matched"
-		chmod 777 "/config/extended/logs/downloaded/musicbrainz_matched"
+	if [ ! -d "/scripts-config/extended/logs/downloaded/musicbrainz_matched" ]; then
+		mkdir -p "/scripts-config/extended/logs/downloaded/musicbrainz_matched"
+		chmod 777 "/scripts-config/extended/logs/downloaded/musicbrainz_matched"
 	fi	
 
-	if [ ! -f "/config/extended/logs/downloaded/musicbrainz_matched/$matchedTagsAlbumReleaseGroupId" ]; then
+	if [ ! -f "/scripts-config/extended/logs/downloaded/musicbrainz_matched/$matchedTagsAlbumReleaseGroupId" ]; then
 		log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Marking MusicBrainz Release Group ($matchedTagsAlbumReleaseGroupId) as succesfully downloaded..."
-		touch "/config/extended/logs/downloaded/musicbrainz_matched/$matchedTagsAlbumReleaseGroupId"
+		touch "/scripts-config/extended/logs/downloaded/musicbrainz_matched/$matchedTagsAlbumReleaseGroupId"
 
 	fi
 
@@ -801,7 +801,7 @@ ProcessWithBeets () {
 		if [ "$wantedAlbumListSource" == "missing" ]; then
 			log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: ERROR :: Already Imported Album (Missing)"
 			rm -rf "$audioPath/incomplete"/*
-			touch /config/extended/beets-error
+			touch /scripts-config/extended/beets-error
 			return
 		else
 			log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Importing Album (Cutoff)"
@@ -883,31 +883,31 @@ DeemixClientSetup () {
 	if [ ! -z "$arlToken" ]; then
 		arlToken="$(echo $arlToken | sed -e "s%[^[:alpha:][:digit:]]%%g" -e "s/  */ /g" | sed 's/^[.]*//' | sed  's/[.]*$//g' | sed  's/^ *//g' | sed 's/ *$//g')"
 		# Create directories
-		mkdir -p /config/xdg/deemix
-		if [ -f "/config/xdg/deemix/.arl" ]; then
-			rm "/config/xdg/deemix/.arl"
+		mkdir -p /scripts-config/xdg/deemix
+		if [ -f "/scripts-config/xdg/deemix/.arl" ]; then
+			rm "/scripts-config/xdg/deemix/.arl"
 		fi
-		if [ ! -f "/config/xdg/deemix/.arl" ]; then
-			echo -n "$arlToken" > "/config/xdg/deemix/.arl"
+		if [ ! -f "/scripts-config/xdg/deemix/.arl" ]; then
+			echo -n "$arlToken" > "/scripts-config/xdg/deemix/.arl"
 		fi
 		log "DEEZER :: ARL Token: Configured"
 	else
 		log "DEEZER :: ERROR :: arlToken setting invalid, currently set to: $arlToken"
 	fi
 	
-	if [ -f "/config/xdg/deemix/config.json" ]; then
-		rm /config/xdg/deemix/config.json
+	if [ -f "/scripts-config/xdg/deemix/config.json" ]; then
+		rm /scripts-config/xdg/deemix/config.json
 	fi
 	
-	if [ -f "/config/extended/deemix_config.json" ]; then
+	if [ -f "/scripts-config/extended/deemix_config.json" ]; then
 		log "DEEZER :: Configuring deemix client"
-		cp /config/extended/deemix_config.json /config/xdg/deemix/config.json
-		chmod 777 /config/xdg/deemix/config.json
+		cp /scripts-config/extended/deemix_config.json /scripts-config/xdg/deemix/config.json
+		chmod 777 /scripts-config/xdg/deemix/config.json
 	fi
 	
-	if [ -d /config/extended/cache/deezer ]; then
+	if [ -d /scripts-config/extended/cache/deezer ]; then
 		log "DEEZER :: Purging album list cache..."
-		rm /config/extended/cache/deezer/*-albums.json &>/dev/null
+		rm /scripts-config/extended/cache/deezer/*-albums.json &>/dev/null
 	fi
 	
 	if [ ! -d "$audioPath/incomplete" ]; then
@@ -925,7 +925,7 @@ DeemixClientSetup () {
 DeezerClientTest () {
 	log "DEEZER :: deemix client setup verification..."
 
-	deemix -b 128 -p $audioPath/incomplete "https://www.deezer.com/album/$deezerClientTestDownloadId"  2>&1 | tee -a "/config/logs/$logFileName"
+	deemix -b 128 -p $audioPath/incomplete "https://www.deezer.com/album/$deezerClientTestDownloadId"  2>&1 | tee -a "/scripts-config/logs/$logFileName"
 	if [ -d "/tmp/deemix-imgs" ]; then
 		rm -rf /tmp/deemix-imgs
 	fi
@@ -961,18 +961,18 @@ LidarrRootFolderCheck () {
 GetMissingCutOffList () {
     
 	# Remove previous search missing/cutoff list
-	if [ -d  /config/extended/cache/lidarr/list ]; then
-		rm -rf  /config/extended/cache/lidarr/list
+	if [ -d  /scripts-config/extended/cache/lidarr/list ]; then
+		rm -rf  /scripts-config/extended/cache/lidarr/list
 		sleep 0.1
 	fi
 
 	# Create list folder if does not exist
-	mkdir -p /config/extended/cache/lidarr/list
+	mkdir -p /scripts-config/extended/cache/lidarr/list
 
 	# Create notfound log folder if does not exist
-	if [ ! -d /config/extended/logs/notfound ]; then
-		mkdir -p /config/extended/logs/notfound
-		chmod 777 /config/extended/logs/notfound
+	if [ ! -d /scripts-config/extended/logs/notfound ]; then
+		mkdir -p /scripts-config/extended/logs/notfound
+		chmod 777 /scripts-config/extended/logs/notfound
 	fi
 	
 	# Configure searchSort preferences based on settings
@@ -1004,25 +1004,25 @@ GetMissingCutOffList () {
 				dlnumber="$lidarrMissingTotalRecords"
 			fi
 			log "$page :: missing :: Downloading page $page... ($offset - $dlnumber of $lidarrMissingTotalRecords Results)"
-      wget --timeout=0 -q -O - "$arrUrl/api/v1/wanted/missing?page=$page&pagesize=$amountPerPull&sortKey=$searchOrder&sortDirection=$searchDirection&apikey=${arrApiKey}" | jq -r '.records[].id' | sort > /config/extended/cache/tocheck.txt
-			log "$page :: missing :: Filtering Album IDs by removing previously searched Album IDs (/config/extended/logs/notfound/<files>)"
-      ls /config/extended/logs/notfound/ | sed "s/--.*//" > /config/extended/cache/notfound.txt
+      wget --timeout=0 -q -O - "$arrUrl/api/v1/wanted/missing?page=$page&pagesize=$amountPerPull&sortKey=$searchOrder&sortDirection=$searchDirection&apikey=${arrApiKey}" | jq -r '.records[].id' | sort > /scripts-config/extended/cache/tocheck.txt
+			log "$page :: missing :: Filtering Album IDs by removing previously searched Album IDs (/scripts-config/extended/logs/notfound/<files>)"
+      ls /scripts-config/extended/logs/notfound/ | sed "s/--.*//" > /scripts-config/extended/cache/notfound.txt
 
-      for lidarrRecordId in $(comm -13 /config/extended/cache/notfound.txt /config/extended/cache/tocheck.txt); do
-				if [ ! -f /config/extended/logs/notfound/$lidarrRecordId--* ]; then
-					touch "/config/extended/cache/lidarr/list/${lidarrRecordId}-missing"
+      for lidarrRecordId in $(comm -13 /scripts-config/extended/cache/notfound.txt /scripts-config/extended/cache/tocheck.txt); do
+				if [ ! -f /scripts-config/extended/logs/notfound/$lidarrRecordId--* ]; then
+					touch "/scripts-config/extended/cache/lidarr/list/${lidarrRecordId}-missing"
 				fi
 			done
-      rm /config/extended/cache/notfound.txt /config/extended/cache/tocheck.txt
+      rm /scripts-config/extended/cache/notfound.txt /scripts-config/extended/cache/tocheck.txt
 			
-			lidarrMissingRecords=$(ls /config/extended/cache/lidarr/list 2>/dev/null | wc -l)
+			lidarrMissingRecords=$(ls /scripts-config/extended/cache/lidarr/list 2>/dev/null | wc -l)
 			log "$page :: missing :: ${lidarrMissingRecords} albums found to process!"
 			wantedListAlbumTotal=$lidarrMissingRecords
 
 			if [ ${lidarrMissingRecords} -gt 0 ]; then
 				log "$page :: missing :: Searching for $wantedListAlbumTotal items"
 				SearchProcess
-				rm /config/extended/cache/lidarr/list/*-missing
+				rm /scripts-config/extended/cache/lidarr/list/*-missing
 			fi
 		done
 	fi
@@ -1046,26 +1046,26 @@ GetMissingCutOffList () {
 
 			log "$page :: cutoff :: Downloading page $page... ($offset - $dlnumber of $lidarrCutoffTotalRecords Results)"
 			# lidarrRecords=$(wget --timeout=0 -q -O - "$arrUrl/api/v1/wanted/cutoff?page=$page&pagesize=$amountPerPull&sortKey=$searchOrder&sortDirection=$searchDirection&apikey=${arrApiKey}" | jq -r '.records[].id')
-      wget --timeout=0 -q -O - "$arrUrl/api/v1/wanted/cutoff?page=$page&pagesize=$amountPerPull&sortKey=$searchOrder&sortDirection=$searchDirection&apikey=${arrApiKey}" | jq -r '.records[].id' | sort > /config/extended/cache/tocheck.txt
+      wget --timeout=0 -q -O - "$arrUrl/api/v1/wanted/cutoff?page=$page&pagesize=$amountPerPull&sortKey=$searchOrder&sortDirection=$searchDirection&apikey=${arrApiKey}" | jq -r '.records[].id' | sort > /scripts-config/extended/cache/tocheck.txt
 
-			log "$page :: cutoff :: Filtering Album IDs by removing previously searched Album IDs (/config/extended/logs/notfound/<files>)"
-			ls /config/extended/logs/notfound/ | sed "s/--.*//" > /config/extended/cache/notfound.txt
+			log "$page :: cutoff :: Filtering Album IDs by removing previously searched Album IDs (/scripts-config/extended/logs/notfound/<files>)"
+			ls /scripts-config/extended/logs/notfound/ | sed "s/--.*//" > /scripts-config/extended/cache/notfound.txt
 
-      for lidarrRecordId in $(comm -13 /config/extended/cache/notfound.txt /config/extended/cache/tocheck.txt); do
-				if [ ! -f /config/extended/logs/notfound/$lidarrRecordId--* ]; then
-					touch /config/extended/cache/lidarr/list/${lidarrRecordId}-cutoff
+      for lidarrRecordId in $(comm -13 /scripts-config/extended/cache/notfound.txt /scripts-config/extended/cache/tocheck.txt); do
+				if [ ! -f /scripts-config/extended/logs/notfound/$lidarrRecordId--* ]; then
+					touch /scripts-config/extended/cache/lidarr/list/${lidarrRecordId}-cutoff
 				fi
 			done
-      rm /config/extended/cache/notfound.txt /config/extended/cache/tocheck.txt
+      rm /scripts-config/extended/cache/notfound.txt /scripts-config/extended/cache/tocheck.txt
 
-			lidarrCutoffRecords=$(ls /config/extended/cache/lidarr/list/*-cutoff 2>/dev/null | wc -l)
+			lidarrCutoffRecords=$(ls /scripts-config/extended/cache/lidarr/list/*-cutoff 2>/dev/null | wc -l)
 			log "$page :: cutoff :: ${lidarrCutoffRecords} ablums found to process!"
 			wantedListAlbumTotal=$lidarrCutoffRecords
 
 			if [ ${lidarrCutoffRecords} -gt 0 ]; then
 				log "$page :: cutoff :: Searching for $wantedListAlbumTotal items"
 				SearchProcess
-				rm /config/extended/cache/lidarr/list/*-cutoff
+				rm /scripts-config/extended/cache/lidarr/list/*-cutoff
 			fi
 
 		done
@@ -1080,7 +1080,7 @@ SearchProcess () {
 	fi
 
 	processNumber=0
-	for lidarrMissingId in $(ls -tr /config/extended/cache/lidarr/list); do
+	for lidarrMissingId in $(ls -tr /scripts-config/extended/cache/lidarr/list); do
 		processNumber=$(( $processNumber + 1 ))
 		wantedAlbumId=$(echo $lidarrMissingId | sed -e "s%[^[:digit:]]%%g")
 		checkLidarrAlbumId=$wantedAlbumId
@@ -1095,7 +1095,7 @@ SearchProcess () {
 		
 		LidarrTaskStatusCheck
 				
-		if [ -f "/config/extended/logs/notfound/$wantedAlbumId--$lidarrArtistForeignArtistId--$lidarrAlbumForeignAlbumId" ]; then
+		if [ -f "/scripts-config/extended/logs/notfound/$wantedAlbumId--$lidarrArtistForeignArtistId--$lidarrAlbumForeignAlbumId" ]; then
 			log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $wantedAlbumListSource :: $lidarrAlbumType :: $wantedAlbumListSource :: $lidarrArtistName :: $lidarrAlbumTitle :: Previously Not Found, skipping..."
 			continue
 		fi
@@ -1103,8 +1103,8 @@ SearchProcess () {
 		if [ "$enableVideoScript" == "true" ]; then
 			# Skip Video Check for Various Artists album searches because videos are not supported...
 			if [ "$lidarrArtistForeignArtistId" != "89ad4ac3-39f7-470e-963a-56509c546377" ]; then
-				if [ -d /config/extended/logs/video/complete ]; then
-					if [ ! -f "/config/extended/logs/video/complete/$lidarrArtistForeignArtistId" ]; then
+				if [ -d /scripts-config/extended/logs/video/complete ]; then
+					if [ ! -f "/scripts-config/extended/logs/video/complete/$lidarrArtistForeignArtistId" ]; then
 						log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrAlbumType :: $wantedAlbumListSource :: $lidarrArtistName :: $lidarrAlbumTitle :: Skipping until all videos are processed for the artist..."
 						continue
 					fi
@@ -1115,11 +1115,11 @@ SearchProcess () {
 			fi
 		fi
 		
-		if [ -f "/config/extended/logs/downloaded/notfound/$lidarrAlbumForeignAlbumId" ]; then
+		if [ -f "/scripts-config/extended/logs/downloaded/notfound/$lidarrAlbumForeignAlbumId" ]; then
 			log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrAlbumTitle :: $lidarrAlbumType :: Previously Not Found, skipping..."
-			rm "/config/extended/logs/downloaded/notfound/$lidarrAlbumForeignAlbumId"
-			touch "/config/extended/logs/notfound/$wantedAlbumId--$lidarrArtistForeignArtistId--$lidarrAlbumForeignAlbumId"
-			chmod 777 "/config/extended/logs/notfound/$wantedAlbumId--$lidarrArtistForeignArtistId--$lidarrAlbumForeignAlbumId"
+			rm "/scripts-config/extended/logs/downloaded/notfound/$lidarrAlbumForeignAlbumId"
+			touch "/scripts-config/extended/logs/notfound/$wantedAlbumId--$lidarrArtistForeignArtistId--$lidarrAlbumForeignAlbumId"
+			chmod 777 "/scripts-config/extended/logs/notfound/$wantedAlbumId--$lidarrArtistForeignArtistId--$lidarrAlbumForeignAlbumId"
 			continue
 		fi
 
@@ -1185,13 +1185,13 @@ SearchProcess () {
 		if [ "$skipDeezer" == "false" ]; then
 
 			if [ -z "$deezerArtistUrl" ]; then 
-				log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: DEEZER :: ERROR :: musicbrainz id: $lidarrArtistForeignArtistId is missing Deezer link, see: \"/config/logs/deezer-artist-id-not-found.txt\" for more detail..."
-				touch "/config/logs/deezer-artist-id-not-found.txt"
-				if cat "/config/logs/deezer-artist-id-not-found.txt" | grep "https://musicbrainz.org/artist/$lidarrArtistForeignArtistId/edit" | read; then
+				log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: DEEZER :: ERROR :: musicbrainz id: $lidarrArtistForeignArtistId is missing Deezer link, see: \"/scripts-config/logs/deezer-artist-id-not-found.txt\" for more detail..."
+				touch "/scripts-config/logs/deezer-artist-id-not-found.txt"
+				if cat "/scripts-config/logs/deezer-artist-id-not-found.txt" | grep "https://musicbrainz.org/artist/$lidarrArtistForeignArtistId/edit" | read; then
 					sleep 0.01
 				else
-					echo "Update Musicbrainz Relationship Page: https://musicbrainz.org/artist/$lidarrArtistForeignArtistId/edit for \"${lidarrArtistName}\" with Deezer Artist Link" >> "/config/logs/deezer-artist-id-not-found.txt"
-					chmod 777 "/config/logs/deezer-artist-id-not-found.txt"
+					echo "Update Musicbrainz Relationship Page: https://musicbrainz.org/artist/$lidarrArtistForeignArtistId/edit for \"${lidarrArtistName}\" with Deezer Artist Link" >> "/scripts-config/logs/deezer-artist-id-not-found.txt"
+					chmod 777 "/scripts-config/logs/deezer-artist-id-not-found.txt"
 					NotifyWebhook "ArtistError" "Update Musicbrainz Relationship Page: <https://musicbrainz.org/artist/${lidarrArtistForeignArtistId}/edit> for ${lidarrArtistName} with Deezer Artist Link"
 				fi
 				skipDeezer=true
@@ -1202,13 +1202,13 @@ SearchProcess () {
         if [ "$skipTidal" == "false" ]; then
 
 			if [ -z "$tidalArtistUrl" ]; then 
-				log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: TIDAL :: ERROR :: musicbrainz id: $lidarrArtistForeignArtistId is missing Tidal link, see: \"/config/logs/tidal-artist-id-not-found.txt\" for more detail..."
-				touch "/config/logs/tidal-artist-id-not-found.txt" 
-				if cat "/config/logs/tidal-artist-id-not-found.txt" | grep "https://musicbrainz.org/artist/$lidarrArtistForeignArtistId/edit" | read; then
+				log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: TIDAL :: ERROR :: musicbrainz id: $lidarrArtistForeignArtistId is missing Tidal link, see: \"/scripts-config/logs/tidal-artist-id-not-found.txt\" for more detail..."
+				touch "/scripts-config/logs/tidal-artist-id-not-found.txt" 
+				if cat "/scripts-config/logs/tidal-artist-id-not-found.txt" | grep "https://musicbrainz.org/artist/$lidarrArtistForeignArtistId/edit" | read; then
 					sleep 0.01
 				else
-					echo "Update Musicbrainz Relationship Page: https://musicbrainz.org/artist/$lidarrArtistForeignArtistId/edit for \"${lidarrArtistName}\" with Tidal Artist Link" >> "/config/logs/tidal-artist-id-not-found.txt"
-					chmod 777 "/config/logs/tidal-artist-id-not-found.txt"
+					echo "Update Musicbrainz Relationship Page: https://musicbrainz.org/artist/$lidarrArtistForeignArtistId/edit for \"${lidarrArtistName}\" with Tidal Artist Link" >> "/scripts-config/logs/tidal-artist-id-not-found.txt"
+					chmod 777 "/scripts-config/logs/tidal-artist-id-not-found.txt"
 					NotifyWebhook "ArtistError" "Update Musicbrainz Relationship Page: <https://musicbrainz.org/artist/${lidarrArtistForeignArtistId}/edit> for ${lidarrArtistName} with Tidal Artist Link"
 				fi
 				skipTidal=true
@@ -1352,9 +1352,9 @@ SearchProcess () {
 				log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Album Not found"
 				if [ "$skipNotFoundLogCreation" == "false" ]; then
 					log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Marking Album as notfound"
-					if [ ! -f "/config/extended/logs/notfound/$wantedAlbumId--$lidarrArtistForeignArtistId--$lidarrAlbumForeignAlbumId" ]; then
-						touch "/config/extended/logs/notfound/$wantedAlbumId--$lidarrArtistForeignArtistId--$lidarrAlbumForeignAlbumId"
-						chmod 777 "/config/extended/logs/notfound/$wantedAlbumId--$lidarrArtistForeignArtistId--$lidarrAlbumForeignAlbumId"
+					if [ ! -f "/scripts-config/extended/logs/notfound/$wantedAlbumId--$lidarrArtistForeignArtistId--$lidarrAlbumForeignAlbumId" ]; then
+						touch "/scripts-config/extended/logs/notfound/$wantedAlbumId--$lidarrArtistForeignArtistId--$lidarrAlbumForeignAlbumId"
+						chmod 777 "/scripts-config/extended/logs/notfound/$wantedAlbumId--$lidarrArtistForeignArtistId--$lidarrAlbumForeignAlbumId"
 					fi
 				else
 					log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Skip marking album as not found because it's a new release for 7 days..."
@@ -1371,20 +1371,20 @@ GetDeezerAlbumInfo () {
 	until false
 	do
 		log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: Getting Album info..."
-		if [ ! -f "/config/extended/cache/deezer/$1.json" ]; then
-			curl -s "https://api.deezer.com/album/$1" -o "/config/extended/cache/deezer/$1.json"
+		if [ ! -f "/scripts-config/extended/cache/deezer/$1.json" ]; then
+			curl -s "https://api.deezer.com/album/$1" -o "/scripts-config/extended/cache/deezer/$1.json"
 			sleep $sleepTimer
 		fi
-		if [ -f "/config/extended/cache/deezer/$1.json" ]; then
-			if jq -e . >/dev/null 2>&1 <<<"$(cat /config/extended/cache/deezer/$1.json)"; then
+		if [ -f "/scripts-config/extended/cache/deezer/$1.json" ]; then
+			if jq -e . >/dev/null 2>&1 <<<"$(cat /scripts-config/extended/cache/deezer/$1.json)"; then
 				log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: Album info downloaded and verified..."
-				chmod 777 /config/extended/cache/deezer/$1.json
+				chmod 777 /scripts-config/extended/cache/deezer/$1.json
 				albumInfoVerified=true
 				break
 			else
 				log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: Error getting album information"
-				if [ -f "/config/extended/cache/deezer/$1.json" ]; then
-					rm "/config/extended/cache/deezer/$1.json"
+				if [ -f "/scripts-config/extended/cache/deezer/$1.json" ]; then
+					rm "/scripts-config/extended/cache/deezer/$1.json"
 				fi
 				log "$page :: $wantedAlbumListSource :: $processNumber of $wantedListAlbumTotal :: $lidarrArtistName :: $lidarrAlbumTitle :: Retrying..."
 			fi
@@ -1402,13 +1402,13 @@ ArtistDeezerSearch () {
 	# $3 Lyric Type (true or false) - false == Clean, true == Explicit
 
 	# Get deezer artist album list
-	if [ ! -d /config/extended/cache/deezer ]; then
-		mkdir -p /config/extended/cache/deezer
+	if [ ! -d /scripts-config/extended/cache/deezer ]; then
+		mkdir -p /scripts-config/extended/cache/deezer
 	fi
-	if [ ! -f "/config/extended/cache/deezer/$2-albums.json" ]; then
-		getDeezerArtistAlbums=$(curl -s "https://api.deezer.com/artist/$2/albums?limit=1000" > "/config/extended/cache/deezer/$2-albums.json")
+	if [ ! -f "/scripts-config/extended/cache/deezer/$2-albums.json" ]; then
+		getDeezerArtistAlbums=$(curl -s "https://api.deezer.com/artist/$2/albums?limit=1000" > "/scripts-config/extended/cache/deezer/$2-albums.json")
 		sleep $sleepTimer
-		getDeezerArtistAlbumsCount="$(cat "/config/extended/cache/deezer/$2-albums.json" | jq -r .total)"
+		getDeezerArtistAlbumsCount="$(cat "/scripts-config/extended/cache/deezer/$2-albums.json" | jq -r .total)"
 	fi
 	
 	if [ "$getDeezerArtistAlbumsCount" == "0" ]; then
@@ -1423,7 +1423,7 @@ ArtistDeezerSearch () {
 	
 	log "$1 :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Artist Search :: Deezer :: $type :: $lidarrReleaseTitle :: Searching $2... (Track Count: $lidarrAlbumReleasesMinTrackCount-$lidarrAlbumReleasesMaxTrackCount)..."		
 	log "$1 :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Artist Search :: Deezer :: $type :: $lidarrReleaseTitle :: Filtering results by lyric type..."
-	deezerArtistAlbumsData=$(cat "/config/extended/cache/deezer/$2-albums.json" | jq -r .data[])
+	deezerArtistAlbumsData=$(cat "/scripts-config/extended/cache/deezer/$2-albums.json" | jq -r .data[])
 	deezerArtistAlbumsIds=$(echo "${deezerArtistAlbumsData}" | jq -r "select(.explicit_lyrics=="$3") | .id")
 
 	resultsCount=$(echo "$deezerArtistAlbumsIds" | wc -l)
@@ -1443,7 +1443,7 @@ ArtistDeezerSearch () {
 			continue
 		fi
 		GetDeezerAlbumInfo "$deezerAlbumID"
-		deezerAlbumData="$(cat "/config/extended/cache/deezer/$deezerAlbumID.json")"
+		deezerAlbumData="$(cat "/scripts-config/extended/cache/deezer/$deezerAlbumID.json")"
 		deezerAlbumTrackCount="$(echo "$deezerAlbumData" | jq -r .nb_tracks)"
 		deezerAlbumExplicitLyrics="$(echo "$deezerAlbumData" | jq -r .explicit_lyrics)"								
 		downloadedReleaseDate="$(echo "$deezerAlbumData" | jq -r .release_date)"
@@ -1489,8 +1489,8 @@ FuzzyDeezerSearch () {
 		type="Clean"
 	fi
 
-	if [ ! -d /config/extended/cache/deezer ]; then
-		mkdir -p /config/extended/cache/deezer
+	if [ ! -d /scripts-config/extended/cache/deezer ]; then
+		mkdir -p /scripts-config/extended/cache/deezer
 	fi
 
 	log "$1 :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Fuzzy Search :: Deezer :: $type :: $lidarrReleaseTitle :: Searching... (Track Count: $lidarrAlbumReleasesMinTrackCount-$lidarrAlbumReleasesMaxTrackCount)"
@@ -1521,7 +1521,7 @@ FuzzyDeezerSearch () {
 			fi
 
 			GetDeezerAlbumInfo "${deezerAlbumID}"
-			deezerAlbumData="$(cat "/config/extended/cache/deezer/$deezerAlbumID.json")"
+			deezerAlbumData="$(cat "/scripts-config/extended/cache/deezer/$deezerAlbumID.json")"
 			deezerAlbumTrackCount="$(echo "$deezerAlbumData" | jq -r .nb_tracks)"
 			deezerAlbumExplicitLyrics="$(echo "$deezerAlbumData" | jq -r .explicit_lyrics)"								
 			downloadedReleaseDate="$(echo "$deezerAlbumData" | jq -r .release_date)"
@@ -1569,12 +1569,12 @@ ArtistTidalSearch () {
 	# $3 Lyric Type (true or false) - false = Clean, true = Explicit
 
 	# Get tidal artist album list
-	if [ ! -f /config/extended/cache/tidal/$2-albums.json ]; then
-		curl -s "https://api.tidal.com/v1/artists/$2/albums?limit=10000&countryCode=$tidalCountryCode&filter=ALL" -H 'x-tidal-token: CzET4vdadNUFQ5JU' > /config/extended/cache/tidal/$2-albums.json
+	if [ ! -f /scripts-config/extended/cache/tidal/$2-albums.json ]; then
+		curl -s "https://api.tidal.com/v1/artists/$2/albums?limit=10000&countryCode=$tidalCountryCode&filter=ALL" -H 'x-tidal-token: CzET4vdadNUFQ5JU' > /scripts-config/extended/cache/tidal/$2-albums.json
 		sleep $sleepTimer
 	fi
 
-	if [ ! -f "/config/extended/cache/tidal/$2-albums.json" ]; then
+	if [ ! -f "/scripts-config/extended/cache/tidal/$2-albums.json" ]; then
 		return
 	fi
 
@@ -1586,7 +1586,7 @@ ArtistTidalSearch () {
 
 
 	log "$1 :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Artist Search :: Tidal :: $type :: $lidarrReleaseTitle :: Searching $2... (Track Count: $lidarrAlbumReleasesMinTrackCount-$lidarrAlbumReleasesMaxTrackCount)..."
-	tidalArtistAlbumsData=$(cat "/config/extended/cache/tidal/$2-albums.json" | jq -r ".items | sort_by(.numberOfTracks) | sort_by(.explicit) | reverse |.[] | select((.numberOfTracks <= $lidarrAlbumReleasesMaxTrackCount) and .numberOfTracks >= $lidarrAlbumReleasesMinTrackCount)")
+	tidalArtistAlbumsData=$(cat "/scripts-config/extended/cache/tidal/$2-albums.json" | jq -r ".items | sort_by(.numberOfTracks) | sort_by(.explicit) | reverse |.[] | select((.numberOfTracks <= $lidarrAlbumReleasesMaxTrackCount) and .numberOfTracks >= $lidarrAlbumReleasesMinTrackCount)")
 
 	log "$1 :: $lidarrArtistName :: $lidarrAlbumTitle :: $lidarrAlbumType :: Artist Search :: Tidal :: $type :: $lidarrReleaseTitle :: Filtering results by lyric type, track count"
 	tidalArtistAlbumsIds=$(echo "${tidalArtistAlbumsData}" | jq -r "select(.explicit=="$3") | .id")
@@ -1770,20 +1770,20 @@ LidarrMissingAlbumSearch () {
 		lidarrArtistData=$(echo $lidarrMissingAlbumArtistsData | jq -r "select(.id==$lidarrArtistId)")
 		lidarrArtistName=$(echo $lidarrArtistData | jq -r .artistName)
 		lidarrArtistMusicbrainzId=$(echo $lidarrArtistData | jq -r .foreignArtistId)
-		if [ -d /config/extended/logs/searched/lidarr/artist ]; then
-			if [ -f /config/extended/logs/searched/lidarr/artist/$lidarrArtistMusicbrainzId ]; then
+		if [ -d /scripts-config/extended/logs/searched/lidarr/artist ]; then
+			if [ -f /scripts-config/extended/logs/searched/lidarr/artist/$lidarrArtistMusicbrainzId ]; then
 				log "$processCount of $lidarrArtistIdsCount :: Previously Notified Lidarr to search for \"$lidarrArtistName\" :: Skipping..."
 				continue
 			fi
 		fi
 		log "$processCount of $lidarrArtistIdsCount :: Notified Lidarr to search for \"$lidarrArtistName\""
 		startLidarrArtistSearch=$(curl -s "$arrUrl/api/v1/command" -X POST -H "Content-Type: application/json" -H "X-Api-Key: $arrApiKey"  --data-raw "{\"name\":\"ArtistSearch\",\"artistId\":$lidarrArtistId}")
-		if [ ! -d /config/extended/logs/searched/lidarr/artist ]; then
-			mkdir -p /config/extended/logs/searched/lidarr/artist
-			chmod -R 777 /config/extended/logs/searched/lidarr/artist
+		if [ ! -d /scripts-config/extended/logs/searched/lidarr/artist ]; then
+			mkdir -p /scripts-config/extended/logs/searched/lidarr/artist
+			chmod -R 777 /scripts-config/extended/logs/searched/lidarr/artist
 		fi
-		touch /config/extended/logs/searched/lidarr/artist/$lidarrArtistMusicbrainzId
-		chmod 777 /config/extended/logs/searched/lidarr/artist/$lidarrArtistMusicbrainzId
+		touch /scripts-config/extended/logs/searched/lidarr/artist/$lidarrArtistMusicbrainzId
+		chmod 777 /scripts-config/extended/logs/searched/lidarr/artist/$lidarrArtistMusicbrainzId
 	done
 }
 

@@ -3,13 +3,13 @@ scriptVersion="1.3"
 scriptName="UnmappedFilesCleaner"
 
 #### Import Settings
-source /config/extended.conf
+source /scripts-config/extended.conf
 #### Import Functions
-source /config/extended/functions
+source /scripts-config/extended/functions
 
 verifyConfig () {
   if [ "$enableUnmappedFilesCleaner" != "true" ]; then
-    log "Script is not enabled, enable by setting enableUnmappedFilesCleaner to \"true\" by modifying the \"/config/extended.conf\" config file..."
+    log "Script is not enabled, enable by setting enableUnmappedFilesCleaner to \"true\" by modifying the \"/scripts-config/extended.conf\" config file..."
     log "Sleeping (infinity)"
     sleep infinity
   fi

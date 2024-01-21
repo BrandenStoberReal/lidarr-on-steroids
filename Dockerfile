@@ -56,6 +56,8 @@ RUN chmod +x /etc/services.d/*/run && \
 VOLUME ["/config", "/music"]
 EXPOSE 6595 8686
 
+WORKDIR /
+
 # Tidal freya client
 RUN npm install -g miraclx/freyr-js
 

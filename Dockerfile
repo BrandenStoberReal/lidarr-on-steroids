@@ -125,13 +125,13 @@ RUN echo "Download Tidal config..."
 RUN curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/tidal-dl.json" -o /scripts-config/extended/tidal-dl.json
 
 RUN echo "Download LyricExtractor script..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/LyricExtractor.bash -o /scripts-config/extended/LyricExtractor.bash
+RUN curl https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/modified-scripts/LyricExtractor.bash -o /scripts-config/extended/LyricExtractor.bash
 
 RUN echo "Download ArtworkExtractor script..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/ArtworkExtractor.bash -o /scripts-config/extended/ArtworkExtractor.bash
+RUN curl https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/modified-scripts/ArtworkExtractor.bash -o /scripts-config/extended/ArtworkExtractor.bash
 
 RUN echo "Download Beets Tagger script..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/BeetsTagger.bash -o /scripts-config/extended/BeetsTagger.bash
+RUN curl https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/modified-scripts/BeetsTagger.bash -o /scripts-config/extended/BeetsTagger.bash
 
 RUN echo "Download Beets config..."
 RUN curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/beets-config.yaml" -o /scripts-config/extended/beets-config.yaml

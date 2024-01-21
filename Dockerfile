@@ -113,10 +113,10 @@ RUN curl https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/
 RUN mkdir -p /scripts-config
 RUN mkdir -p /scripts-config/extended
 RUN echo "Download Script Functions..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/universal/functions.bash -o /scripts-config/extended/functions
+RUN curl https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/modified-scripts/functions.bash -o /scripts-config/extended/functions
 
 RUN echo "Download PlexNotify script..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/PlexNotify.bash -o /scripts-config/extended/PlexNotify.bash 
+RUN curl https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/modified-scripts/PlexNotify.bash -o /scripts-config/extended/PlexNotify.bash 
 
 RUN echo "Download SMA config..."
 RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/sma.ini -o /scripts-config/extended/sma.ini 

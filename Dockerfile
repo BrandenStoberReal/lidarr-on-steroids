@@ -3,7 +3,7 @@ FROM --platform=linux/amd64 docker.io/library/node:16-alpine as deemix
 RUN echo "Building for TARGETPLATFORM=linux/amd64 | BUILDPLATFORM=linux/amd64"
 
 # Default packages
-RUN apk add --no-cache git jq python3 make gcc musl-dev g++ wget curl tidyhtml musl-locales musl-locales-lang flac gcc ffmpeg imagemagick opus-tools opustags libc-dev py3-pip npm yt-dlp && \
+RUN apk add --no-cache git jq python3 make gcc musl-dev g++ wget curl tidyhtml musl-locales musl-locales-lang flac gcc ffmpeg imagemagick opus-tools opustags libc-dev py3-pip nodejs npm yt-dlp && \
     rm -rf /var/lib/apt/lists/*
 
 # Clone deemix & process

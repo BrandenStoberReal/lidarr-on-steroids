@@ -31,8 +31,8 @@ LABEL maintainer="brandens"
 ENV DEEMIX_SINGLE_USER=true
 ENV AUTOCONFIG=true
 ENV CLEAN_DOWNLOADS=true
-ENV PUID=1
-ENV PGID=1
+ENV PUID=0
+ENV PGID=0
 
 # flac2mp3
 RUN apk add --no-cache ffmpeg && \
@@ -59,7 +59,7 @@ EXPOSE 6595 8686
 # Reinstall default packages
 RUN apk add --no-cache git jq python3 make gcc musl-dev g++ wget curl tidyhtml musl-locales musl-locales-lang flac gcc ffmpeg imagemagick opus-tools opustags libc-dev py3-pip nodejs npm yt-dlp && \
     rm -rf /var/lib/apt/lists/*
-    
+
 # Tidal freya client
 RUN npm install -g miraclx/freyr-js
 

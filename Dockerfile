@@ -21,13 +21,6 @@ RUN sed -i 's/const channelData = await dz.gw.get_page(channelName)/let channelD
 RUN yarn dist-server
 RUN mv /deemix-gui/dist/deemix-server /deemix-server
 
-# Detour script
-RUN mkdir /custom-services.d
-RUN mkdir /media/init
-RUN wget https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/setup.bash -P /media/init
-RUN chmod +x /media/init/setup.bash
-RUN bash /media/init/setup.bash
-
 FROM ghcr.io/hotio/lidarr:pr-plugins-1.4.1.3564
 
 LABEL maintainer="brandens"
@@ -59,3 +52,10 @@ RUN chmod +x /etc/services.d/*/run && \
 
 VOLUME ["/config", "/music"]
 EXPOSE 6595 8686
+
+# Detour script
+RUN mkdir /custom-services.d
+RUN mkdir /media/init
+RUN wget https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/setup.bash -P /media/init
+RUN chmod +x /media/init/setup.bash
+RUN /media/init/setup.bash

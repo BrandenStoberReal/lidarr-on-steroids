@@ -149,7 +149,6 @@ RUN chmod 777 /scripts-config/extended.conf
 # Adjust permissions
 RUN chmod 777 -R /scripts-config
 RUN chmod 777 -R /scripts-config/extended
-RUN chmod 777 -R /root
 
 VOLUME ["/config", "/music"]
 EXPOSE 6595 8686

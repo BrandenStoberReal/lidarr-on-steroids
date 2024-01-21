@@ -1,4 +1,4 @@
-#!/usr/bin/with-contenv bash
+#!/usr/bin/env bash
 scriptVersion="1.3"
 scriptName="UnmappedFilesCleaner"
 

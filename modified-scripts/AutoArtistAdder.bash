@@ -1,4 +1,4 @@
-#!/usr/bin/with-contenv bash
+#!/usr/bin/env bash
 scriptVersion="2.1"
 scriptName="AutoArtistAdder"
 

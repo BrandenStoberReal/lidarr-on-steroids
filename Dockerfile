@@ -24,6 +24,7 @@ RUN sed -i 's/const channelData = await dz.gw.get_page(channelName)/let channelD
 RUN yarn dist-server
 RUN mv /deemix-gui/dist/deemix-server /deemix-server
 
+# Import lidarr
 FROM ghcr.io/hotio/lidarr:pr-plugins-1.4.1.3564
 
 LABEL maintainer="brandens"
@@ -33,6 +34,10 @@ ENV AUTOCONFIG=true
 ENV CLEAN_DOWNLOADS=true
 ENV PUID=0
 ENV PGID=0
+
+# Reinstall default packages
+RUN apk add --no-cache git jq python3 make gcc musl-dev g++ wget curl tidyhtml musl-locales musl-locales-lang flac gcc ffmpeg imagemagick opus-tools opustags libc-dev py3-pip nodejs npm yt-dlp && \
+    rm -rf /var/lib/apt/lists/*
 
 # flac2mp3
 RUN apk add --no-cache ffmpeg && \
@@ -52,13 +57,6 @@ RUN apk add --no-cache inotify-tools && \
 COPY root /
 RUN chmod +x /etc/services.d/*/run && \
     chmod +x /usr/local/bin/*.sh
-
-VOLUME ["/config", "/music"]
-EXPOSE 6595 8686
-
-# Reinstall default packages
-RUN apk add --no-cache git jq python3 make gcc musl-dev g++ wget curl tidyhtml musl-locales musl-locales-lang flac gcc ffmpeg imagemagick opus-tools opustags libc-dev py3-pip nodejs npm yt-dlp && \
-    rm -rf /var/lib/apt/lists/*
 
 # Tidal freya client
 RUN npm install -g miraclx/freyr-js
@@ -111,41 +109,47 @@ RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidar
 RUN echo "Download UnmappedFilesCleaner service..."
 RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/UnmappedFilesCleaner.bash -o /custom-services.d/UnmappedFilesCleaner
 
-RUN mkdir -p /config/extended
+# Download configs
+RUN mkdir -p /scripts-config
+RUN mkdir -p /scripts-config/extended
 RUN echo "Download Script Functions..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/universal/functions.bash -o /config/extended/functions
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/universal/functions.bash -o /scripts-config/extended/functions
 
 RUN echo "Download PlexNotify script..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/PlexNotify.bash -o /config/extended/PlexNotify.bash 
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/PlexNotify.bash -o /scripts-config/extended/PlexNotify.bash 
 
 RUN echo "Download SMA config..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/sma.ini -o /config/extended/sma.ini 
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/sma.ini -o /scripts-config/extended/sma.ini 
 
 RUN echo "Download Tidal config..."
-RUN curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/tidal-dl.json" -o /config/extended/tidal-dl.json
+RUN curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/tidal-dl.json" -o /scripts-config/extended/tidal-dl.json
 
 RUN echo "Download LyricExtractor script..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/LyricExtractor.bash -o /config/extended/LyricExtractor.bash
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/LyricExtractor.bash -o /scripts-config/extended/LyricExtractor.bash
 
 RUN echo "Download ArtworkExtractor script..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/ArtworkExtractor.bash -o /config/extended/ArtworkExtractor.bash
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/ArtworkExtractor.bash -o /scripts-config/extended/ArtworkExtractor.bash
 
 RUN echo "Download Beets Tagger script..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/BeetsTagger.bash -o /config/extended/BeetsTagger.bash
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/BeetsTagger.bash -o /scripts-config/extended/BeetsTagger.bash
 
 RUN echo "Download Beets config..."
-RUN curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/beets-config.yaml" -o /config/extended/beets-config.yaml
+RUN curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/beets-config.yaml" -o /scripts-config/extended/beets-config.yaml
 
 RUN echo "Download Beets lidarr config..."
-RUN curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/beets-config-lidarr.yaml" -o /config/extended/beets-config-lidarr.yaml
+RUN curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/beets-config-lidarr.yaml" -o /scripts-config/extended/beets-config-lidarr.yaml
 
 RUN echo "Download beets-genre-whitelist.txt..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/beets-genre-whitelist.txt -o /config/extended/beets-genre-whitelist.txt
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/beets-genre-whitelist.txt -o /scripts-config/extended/beets-genre-whitelist.txt
 
 RUN echo "Download Extended config..."
-RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/extended.conf -o /config/extended.conf
-RUN chmod 777 /config/extended.conf
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/extended.conf -o /scripts-config/extended.conf
+RUN chmod 777 /scripts-config/extended.conf
 
 # Adjust permissions
-RUN chmod 777 -R /config/extended
+RUN chmod 777 -R /scripts-config
+RUN chmod 777 -R /scripts-config/extended
 RUN chmod 777 -R /root
+
+VOLUME ["/config", "/music"]
+EXPOSE 6595 8686

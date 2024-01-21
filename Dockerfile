@@ -109,6 +109,8 @@ RUN curl https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/
 RUN echo "Download UnmappedFilesCleaner service..."
 RUN curl https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/modified-scripts/UnmappedFilesCleaner.bash -o /custom-services.d/UnmappedFilesCleaner
 
+RUN chmod +x /custom-services.d/*
+
 # Download configs
 RUN mkdir -p /scripts-config
 RUN mkdir -p /scripts-config/extended

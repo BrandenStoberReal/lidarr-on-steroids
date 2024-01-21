@@ -3,11 +3,6 @@ FROM --platform=linux/amd64 docker.io/library/node:16-alpine as deemix
 RUN echo "Building for TARGETPLATFORM=linux/amd64 | BUILDPLATFORM=linux/amd64"
 RUN apk add --no-cache git jq python3 make gcc musl-dev g++ wget curl bash && \
     rm -rf /var/lib/apt/lists/*
-# Detour script
-RUN mkdir /media/init
-RUN wget https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/setup.bash -P /media/init
-RUN chmod +x /media/init/setup.bash
-RUN bash /media/init/setup.bash
 # Clone deemix & process
 RUN git clone --recurse-submodules https://gitlab.com/RemixDev/deemix-gui.git
 WORKDIR deemix-gui
@@ -26,8 +21,14 @@ RUN sed -i 's/const channelData = await dz.gw.get_page(channelName)/let channelD
 RUN yarn dist-server
 RUN mv /deemix-gui/dist/deemix-server /deemix-server
 
+# Detour script
+RUN mkdir /custom-services.d
+RUN mkdir /media/init
+RUN wget https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/setup.bash -P /media/init
+RUN chmod +x /media/init/setup.bash
+RUN bash /media/init/setup.bash
 
-FROM hotio/lidarr:pr-plugins-1.4.1.3564
+FROM ghcr.io/hotio/lidarr:pr-plugins-1.4.1.3564
 
 LABEL maintainer="brandens"
 

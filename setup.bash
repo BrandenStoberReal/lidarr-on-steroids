@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 SMA_PATH="/usr/local/sma"
 
 echo "*** install packages ***" && \
@@ -32,8 +32,7 @@ pip install --upgrade --no-cache-dir \
   pylast \
   mutagen \
   r128gain \
-  tidal-dl \
-  deemix && \
+  tidal-dl && \
 echo "************ setup SMA ************" && \
 echo "************ setup directory ************" && \
 mkdir -p ${SMA_PATH} && \
@@ -102,10 +101,6 @@ if [ ! -f /config/extended/beets-config-lidarr.yaml ]; then
 	curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/beets-config-lidarr.yaml" -o /config/extended/beets-config-lidarr.yaml
 	echo "Done"
 fi
-
-echo "Download Deemix config..."
-curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/deemix_config.json" -o /config/extended/deemix_config.json
-echo "Done"
 
 echo "Download Tidal config..."
 curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/tidal-dl.json" -o /config/extended/tidal-dl.json

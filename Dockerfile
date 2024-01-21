@@ -1,8 +1,119 @@
 FROM --platform=linux/amd64 docker.io/library/node:16-alpine as deemix
 
 RUN echo "Building for TARGETPLATFORM=linux/amd64 | BUILDPLATFORM=linux/amd64"
-RUN apk add --no-cache git jq python3 make gcc musl-dev g++ wget curl bash && \
+
+# Default packages
+RUN apk add --no-cache git jq python3 make gcc musl-dev g++ wget curl tidyhtml musl-locales musl-locales-lang flac gcc ffmpeg imagemagick opus-tools opustags libc-dev py3-pip npm yt-dlp && \
     rm -rf /var/lib/apt/lists/*
+
+# Tidal freya client
+RUN npm install -g miraclx/freyr-js
+
+# Tidal python packages
+RUN pip install --upgrade --no-cache-dir yq pyacoustid requests pylast mutagen r128gain tidal-dl
+
+# Tidal integration packages
+RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing atomicparsley
+RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/community beets
+
+# Make SMA Dir
+RUN mkdir -p "/usr/local/sma"
+
+# Clone sickbeard repo
+RUN git clone https://github.com/mdhiggins/sickbeard_mp4_automator.git "/usr/local/sma"
+
+# Create sickbeard config dir
+RUN mkdir -p "/usr/local/sma/config"
+RUN touch "/usr/local/sma/config/sma.log"
+RUN chgrp users "/usr/local/sma/config/sma.log"
+RUN chmod g+w "/usr/local/sma/config/sma.log"
+
+# Install sickbeard python dependencies
+RUN python3 -m pip install --upgrade pip
+RUN pip3 install -r "/usr/local/sma/setup/requirements.txt"
+
+# Create services directory
+RUN mkdir -p /custom-services.d
+
+# Download services
+RUN echo "Download QueueCleaner service..."
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/universal/services/QueueCleaner -o /custom-services.d/QueueCleaner
+RUN echo "Done"
+
+RUN echo "Download AutoConfig service..."
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/AutoConfig.service.bash -o /custom-services.d/AutoConfig
+RUN echo "Done"
+
+RUN echo "Download Video service..."
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/Video.service.bash -o /custom-services.d/Video
+RUN echo "Done"
+
+RUN echo "Download Tidal Video Downloader service..."
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/TidalVideoDownloader.bash -o /custom-services.d/TidalVideoDownloader
+RUN echo "Done"
+
+RUN echo "Download Audio service..."
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/Audio.service.bash -o /custom-services.d/Audio
+RUN echo "Done"
+
+RUN echo "Download AutoArtistAdder service..."
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/AutoArtistAdder.bash -o /custom-services.d/AutoArtistAdder
+RUN echo "Done"
+
+RUN echo "Download UnmappedFilesCleaner service..."
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/UnmappedFilesCleaner.bash -o /custom-services.d/UnmappedFilesCleaner
+RUN echo "Done"
+
+RUN mkdir -p /config/extended
+RUN echo "Download Script Functions..."
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/universal/functions.bash -o /config/extended/functions
+RUN echo "Done"
+
+RUN echo "Download PlexNotify script..."
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/PlexNotify.bash -o /config/extended/PlexNotify.bash 
+RUN echo "Done"
+
+RUN echo "Download SMA config..."
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/sma.ini -o /config/extended/sma.ini 
+RUN echo "Done"
+
+RUN echo "Download Tidal config..."
+RUN curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/tidal-dl.json" -o /config/extended/tidal-dl.json
+RUN echo "Done"
+
+RUN echo "Download LyricExtractor script..."
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/LyricExtractor.bash -o /config/extended/LyricExtractor.bash
+RUN echo "Done"
+
+RUN echo "Download ArtworkExtractor script..."
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/ArtworkExtractor.bash -o /config/extended/ArtworkExtractor.bash
+RUN echo "Done"
+
+RUN echo "Download Beets Tagger script..."
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/BeetsTagger.bash -o /config/extended/BeetsTagger.bash
+RUN echo "Done"
+
+RUN echo "Download Beets config..."
+RUN curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/beets-config.yaml" -o /config/extended/beets-config.yaml
+RUN echo "Done"
+
+RUN echo "Download Beets lidarr config..."
+RUN curl "https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/beets-config-lidarr.yaml" -o /config/extended/beets-config-lidarr.yaml
+RUN echo "Done"
+
+RUN echo "Download beets-genre-whitelist.txt..."
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/beets-genre-whitelist.txt -o /config/extended/beets-genre-whitelist.txt
+RUN echo "Done"
+
+RUN echo "Download Extended config..."
+RUN curl https://raw.githubusercontent.com/RandomNinjaAtk/arr-scripts/main/lidarr/extended.conf -o /config/extended.conf
+RUN chmod 777 /config/extended.conf
+RUN echo "Done"
+
+# Adjust permissions
+RUN chmod 777 -R /config/extended
+RUN chmod 777 -R /root
+
 # Clone deemix & process
 RUN git clone --recurse-submodules https://gitlab.com/RemixDev/deemix-gui.git
 WORKDIR deemix-gui
@@ -52,10 +163,3 @@ RUN chmod +x /etc/services.d/*/run && \
 
 VOLUME ["/config", "/music"]
 EXPOSE 6595 8686
-
-# Detour script
-RUN mkdir /custom-services.d
-RUN mkdir /media/init
-RUN wget https://raw.githubusercontent.com/BrandenStoberReal/lidarr-on-steroids/main/setup.bash -P /media/init
-RUN chmod +x /media/init/setup.bash
-RUN /media/init/setup.bash
